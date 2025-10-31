@@ -113,26 +113,14 @@ export default function AdminiFlexHomepage() {
           <div className="p-6 rounded-xl border">
             <h3 className="font-medium" style={{ color: oldGreen }}>Vereniging</h3>
             <p className="mt-2 text-sm text-zinc-700">Met of zonder leden. Ledenadministratie, contributie, kas/bank, rapporten.</p>
-            <ul className="mt-4 text-sm list-disc list-inside text-zinc-700">
-              <li>Contributieruns</li>
-              <li>Openstaande contributies</li>
-            </ul>
           </div>
           <div className="p-6 rounded-xl border">
             <h3 className="font-medium" style={{ color: oldGreen }}>Webshop / Handel</h3>
             <p className="mt-2 text-sm text-zinc-700">Voorraadbeheer (gem. kostprijs), marge per product, Mollie & Klarna, btw.</p>
-            <ul className="mt-4 text-sm list-disc list-inside text-zinc-700">
-              <li>Voorraadmutaties & COGS</li>
-              <li>Payout-matching</li>
-            </ul>
           </div>
           <div className="p-6 rounded-xl border">
             <h3 className="font-medium" style={{ color: oldGreen }}>Hovenier / Dienstverlener</h3>
             <p className="mt-2 text-sm text-zinc-700">Kostprijscalculatie, offertes → contracten, uren & materialen.</p>
-            <ul className="mt-4 text-sm list-disc list-inside text-zinc-700">
-              <li>Projectresultaat</li>
-              <li>Periodieke facturen</li>
-            </ul>
           </div>
         </div>
       </section>
@@ -196,19 +184,20 @@ export default function AdminiFlexHomepage() {
                 info@adminiflex.nl
               </a>.
             </p>
-            <form className="mt-6 grid gap-3 max-w-md" data-netlify="true">
+            <form className="mt-6 grid gap-3 max-w-md">
               <input className="border rounded-md px-3 py-2" placeholder="Naam" />
               <input type="email" className="border rounded-md px-3 py-2" placeholder="E-mail" />
               <textarea className="border rounded-md px-3 py-2" rows={4} placeholder="Bericht" />
-              <button type="button" className="px-4 py-2 rounded-md text-white" style={{ backgroundColor: oldGreen }}>
-                Verstuur
-              </button>
+              <a href="mailto:info@adminiflex.nl" className="px-4 py-2 rounded-md text-white inline-block text-center" style={{ backgroundColor: oldGreen }}>
+                Verstuur per e-mail
+              </a>
             </form>
           </div>
+
           <div>
             <h2 className="text-3xl font-semibold tracking-tight">Blijf op de hoogte</h2>
             <p className="mt-2 text-zinc-700">Ontvang nieuws over lancering en nieuwe functies.</p>
-            <form className="mt-6 flex gap-2 max-w-md" data-netlify="true">
+            <form className="mt-6 flex gap-2 max-w-md">
               <input type="email" className="flex-1 border rounded-md px-3 py-2" placeholder="E-mailadres" />
               <button type="button" className="px-4 py-2 rounded-md text-white" style={{ backgroundColor: oldGreen }}>
                 Aanmelden
