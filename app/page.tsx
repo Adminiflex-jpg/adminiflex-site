@@ -131,7 +131,7 @@ export default function AdminiFlexHomepage() {
         <p className="mt-2 text-zinc-700">Betaal alleen voor wat je gebruikt en klaar voor de toekomst.</p>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
-            { n: "Basic", p: "€12,50", f: ["1 gebuiker, 1 administatie en rapportages"] },
+            { n: "Basic", p: "€12,50", f: ["1 gebuiker", "1 administatie", "en rapportages"] },
             { n: "Plus", p: "€24,50", f: ["Alles van Basic", "Leden en/of Voorraad", "en bankkoppeling"] },
             { n: "Pro", p: "€49,50", f: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"] },
           ].map((plan, i) => (
