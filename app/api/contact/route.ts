@@ -1,3 +1,8 @@
+// Zorg dat deze route op Node.js runtime draait (niet Edge)
+export const runtime = "nodejs";
+// (optioneel) forceer server-side uitvoeren
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
@@ -66,3 +71,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "SERVER_ERROR" }, { status: 500 });
   }
 }
+
