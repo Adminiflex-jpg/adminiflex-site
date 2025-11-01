@@ -1,9 +1,5 @@
 import React from "react";
-import dynamic from "next/dynamic";
-
-// Belangrijk: laad de grafiek als client component zonder SSR
-const RevenueChart = dynamic(() => import("./components/RevenueChart"), { ssr: false });
-
+import RevenueChart from "./components/RevenueChart";
 export default function AdminiFlexHomepage() {
   const oldGreen = "#2F6B4F";   // hoofdkleur (oud groen)
   const deepGreen = "#1E4C37";  // donkere tint
