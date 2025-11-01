@@ -43,8 +43,8 @@ export default function AdminiFlexHomepage() {
               AdminiFlex <span className="block" style={{ color: oldGreen }}>de oplossing voor je boekhouding.</span>
             </h1>
             <p className="mt-4 text-lg text-zinc-700 max-w-prose">
-              Alle administratie in één platform — boekhouding, ledenbeheer, voorraad, offertes en betalingen.
-              Eenvoudig, professioneel en klaar voor groei.
+              Alles voor je organisatie in één platform — boekhouding, Ledenadministratie, offertes, contracten, rapportages en meer.
+              Eenvoudig, professioneel en klaar voor de groei van uw organisatie..
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#cta" className="px-5 py-3 rounded-md text-white font-medium" style={{ backgroundColor: oldGreen }}>
@@ -128,12 +128,12 @@ export default function AdminiFlexHomepage() {
       {/* PRIJZEN */}
       <section id="pricing" className="max-w-6xl mx-auto px-4 md:px-6 py-16">
         <h2 className="text-3xl font-semibold tracking-tight">Prijzen</h2>
-        <p className="mt-2 text-zinc-700">Betaal alleen voor wat je gebruikt. Maandelijks opzegbaar.</p>
+        <p className="mt-2 text-zinc-700">Betaal alleen voor wat je gebruikt en klaar voor de toekomst.</p>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
-            { n: "Basic", p: "€9", f: ["Boekhouding & btw", "Export CSV/PDF", "1 gebruiker"] },
-            { n: "Plus", p: "€19", f: ["Alles van Basic", "Leden of Voorraad", "Openstaande posten"] },
-            { n: "Pro", p: "€39", f: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"] },
+            { n: "Basic", p: "€12,50", f: ["1 gebuiker, 1 administatie en rapportages] },
+            { n: "Plus", p: "€24,50", f: ["Alles van Basic", "Leden en/of Voorraad" en bankkoppeling"] },
+            { n: "Pro", p: "€49,50", f: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"] },
           ].map((plan, i) => (
             <div key={i} className={`p-6 rounded-xl border ${i === 1 ? "shadow-md" : ""}`} style={i === 1 ? { borderColor: oldGreen } : {}}>
               <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function AdminiFlexHomepage() {
         <div className="max-w-6xl mx-auto px-4 md:px-6">
           <div className="rounded-2xl p-8 md:p-10 text-white" style={{ background: `linear-gradient(90deg, ${deepGreen}, ${oldGreen})` }}>
             <h3 className="text-2xl font-semibold">Probeer AdminiFlex vandaag</h3>
-            <p className="mt-1 text-white/90">Maak in 5 minuten je account aan en begin meteen — zonder verplichtingen.</p>
+            <p className="mt-1 text-white/90">Maak in 5 minuten je account aan en begin meteen.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#" className="px-5 py-3 rounded-md bg-white text-zinc-900 font-medium">Gratis proberen</a>
               <a href="#demo" className="px-5 py-3 rounded-md border border-white/40 text-white font-medium">Bekijk demo</a>
