@@ -75,7 +75,43 @@ export default function AdminiFlexHomepage() {
               ))}
             </div>
             <div className="mt-6 h-40 rounded-xl border border-dashed text-sm text-zinc-600 flex items-center justify-center">
-              Grafiek omzet & cashflow (voorbeeld)
+              {/* Echte grafiek */}
+<div className="mt-6 border border-dashed rounded-xl p-4">
+  <ResponsiveContainer width="100%" height={250}>
+    <LineChart
+      data={[
+        { maand: "Jan", omzet: 24000, cashflow: 8000 },
+        { maand: "Feb", omzet: 27500, cashflow: 9200 },
+        { maand: "Mrt", omzet: 26000, cashflow: 8800 },
+        { maand: "Apr", omzet: 27450, cashflow: 9240 },
+      ]}
+      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="maand" />
+      <YAxis />
+      <Tooltip />
+      <Legend />
+      <Line
+        type="monotone"
+        dataKey="omzet"
+        stroke="#2F6B4F"
+        strokeWidth={2}
+        dot={{ r: 4 }}
+        name="Omzet (€)"
+      />
+      <Line
+        type="monotone"
+        dataKey="cashflow"
+        stroke="#7ABF9F"
+        strokeWidth={2}
+        dot={{ r: 4 }}
+        name="Cashflow (€)"
+      />
+    </LineChart>
+  </ResponsiveContainer>
+</div>
+
             </div>
           </div>
         </div>
