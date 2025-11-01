@@ -225,6 +225,12 @@ export default function AdminiFlexHomepage() {
           <div>© {new Date().getFullYear()} AdminiFlex. Alle rechten voorbehouden.</div>
         </div>
       </footer>
+      <div className="flex gap-4">
+  <a href="/privacy">Privacy</a>
+  <a href="/voorwaarden">Voorwaarden</a>
+  <a href="/status">Status</a>
+  <a href="/contact">Contact</a>
+</div>
     </main>
   );
 }
