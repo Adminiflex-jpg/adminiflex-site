@@ -53,7 +53,7 @@ export default function RootLayout({
             </nav>
             <div className="flex items-center gap-2">
               <a
-                href="#login"
+                href="/login"
                 className="px-4 py-2 rounded-md border text-sm"
                 style={{ borderColor: oldGreen, color: oldGreen }}
               >
