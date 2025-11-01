@@ -1,14 +1,8 @@
 import React from "react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+// Belangrijk: laad de grafiek als client component zonder SSR
+const RevenueChart = dynamic(() => import("../components/RevenueChart"), { ssr: false });
 
 export default function AdminiFlexHomepage() {
   const oldGreen = "#2F6B4F";   // hoofdkleur (oud groen)
@@ -53,8 +47,8 @@ export default function AdminiFlexHomepage() {
               AdminiFlex <span className="block" style={{ color: oldGreen }}>de oplossing voor je boekhouding.</span>
             </h1>
             <p className="mt-4 text-lg text-zinc-700 max-w-prose">
-              Alles voor je organisatie in één platform — boekhouding, Ledenadministratie, offertes, contracten, rapportages en meer.
-              Eenvoudig, professioneel en klaar voor de groei van uw organisatie..
+              Alles voor je organisatie in één platform — boekhouding, ledenadministratie, offertes, contracten,
+              rapportages en meer. Eenvoudig, professioneel en klaar voor de groei van uw organisatie.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#cta" className="px-5 py-3 rounded-md text-white font-medium" style={{ backgroundColor: oldGreen }}>
@@ -70,7 +64,9 @@ export default function AdminiFlexHomepage() {
               <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">OCR-bonherkenning</span>
             </div>
           </div>
+
           <div className="rounded-2xl border bg-white shadow-sm p-6">
+            {/* KPI-tegels */}
             <div className="grid grid-cols-2 gap-3">
               {[
                 { k: "Omzet", v: "€ 27.450" },
@@ -84,45 +80,9 @@ export default function AdminiFlexHomepage() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 h-40 rounded-xl border border-dashed text-sm text-zinc-600 flex items-center justify-center">
-              {/* Echte grafiek */}
-<div className="mt-6 border border-dashed rounded-xl p-4">
-  <ResponsiveContainer width="100%" height={250}>
-    <LineChart
-      data={[
-        { maand: "Jan", omzet: 24000, cashflow: 8000 },
-        { maand: "Feb", omzet: 27500, cashflow: 9200 },
-        { maand: "Mrt", omzet: 26000, cashflow: 8800 },
-        { maand: "Apr", omzet: 27450, cashflow: 9240 },
-      ]}
-      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="maand" />
-      <YAxis />
-      <Tooltip />
-      <Legend />
-      <Line
-        type="monotone"
-        dataKey="omzet"
-        stroke="#2F6B4F"
-        strokeWidth={2}
-        dot={{ r: 4 }}
-        name="Omzet (€)"
-      />
-      <Line
-        type="monotone"
-        dataKey="cashflow"
-        stroke="#7ABF9F"
-        strokeWidth={2}
-        dot={{ r: 4 }}
-        name="Cashflow (€)"
-      />
-    </LineChart>
-  </ResponsiveContainer>
-</div>
 
-            </div>
+            {/* Echte grafiek (client component) */}
+            <RevenueChart />
           </div>
         </div>
       </section>
@@ -177,8 +137,8 @@ export default function AdminiFlexHomepage() {
         <p className="mt-2 text-zinc-700">Betaal alleen voor wat je gebruikt en klaar voor de toekomst.</p>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
-            { n: "Basic", p: "€12,50", f: ["1 gebuiker", "1 administatie", "en rapportages"] },
-            { n: "Plus", p: "€24,50", f: ["Alles van Basic", "Leden en/of Voorraad", "en bankkoppeling"] },
+            { n: "Basic", p: "€12,50", f: ["1 gebruiker", "1 administratie", "Rapportages"] },
+            { n: "Plus", p: "€24,50", f: ["Alles van Basic", "Leden en/of Voorraad", "Bankkoppeling"] },
             { n: "Pro", p: "€49,50", f: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"] },
           ].map((plan, i) => (
             <div key={i} className={`p-6 rounded-xl border ${i === 1 ? "shadow-md" : ""}`} style={i === 1 ? { borderColor: oldGreen } : {}}>
@@ -272,3 +232,4 @@ export default function AdminiFlexHomepage() {
     </main>
   );
 }
+
