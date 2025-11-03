@@ -1,3 +1,4 @@
+// app/layout.tsx
 import "./globals.css";
 import React from "react";
 import { cookies } from "next/headers";
@@ -8,7 +9,11 @@ export const metadata = {
   description: "De oplossing voor je boekhouding",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const oldGreen = "#2F6B4F";
   const deepGreen = "#1E4C37";
   const lightMint = "#E8F2ED";
@@ -32,7 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-screen text-zinc-900 flex flex-col"
         style={{ background: `linear-gradient(180deg, ${lightMint} 0%, #ffffff 100%)` }}
       >
-        {/* HEADER: op mobiel solide (goed leesbaar), op desktop licht transparant */}
+        {/* HEADER */}
         <header className="sticky top-0 z-40 bg-white border-b md:bg-white/80 md:backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
             <a href="/" className="flex items-center gap-3">
@@ -48,7 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <nav className="hidden md:flex items-center gap-6 text-sm">
               <a href="/#features" style={{ color: oldGreen }}>Functionaliteiten</a>
               <a href="/#modules" style={{ color: oldGreen }}>Modules</a>
-              {/* "Prijzen" uit menu gehaald op verzoek */}
+              <a href="/#pricing" style={{ color: oldGreen }}>Prijzen</a>{/* toegevoegd */}
               <a href="/contact" style={{ color: oldGreen }}>Contact</a>
             </nav>
 
@@ -67,7 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     className="px-4 py-2 rounded-md text-sm text-white"
                     style={{ backgroundColor: oldGreen }}
                   >
-                    Gratis proberen
+                    Vraag demo aan {/* tekst aangepast */}
                   </a>
                 </>
               ) : (
@@ -102,9 +107,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 text-sm text-zinc-600 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
-                className="w-8 h-8 rounded-lg"
+                className="w-8 h-8 rounded-lg grid place-items-center text-white text-[10px] font-semibold"
                 style={{ background: `linear-gradient(135deg, ${oldGreen}, ${deepGreen})` }}
-              />
+              >
+                AF {/* letters toegevoegd */}
+              </div>
               <span className="font-medium">AdminiFlex</span>
             </div>
             <div className="flex gap-4">
