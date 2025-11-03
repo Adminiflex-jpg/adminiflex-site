@@ -1,11 +1,26 @@
 // app/page.tsx
 import React from "react";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import RevenueChart from "./components/RevenueChart";
 
-export default function AdminiFlexHomepage() {
-  const oldGreen = "#2F6B4F";   // hoofdkleur (oud groen)
-  const deepGreen = "#1E4C37";  // donkere tint (alleen voor gradients)
-  const lightMint = "#E8F2ED";  // lichte achtergrond
+export default async function AdminiFlexHomepage() {
+  const oldGreen = "#2F6B4F";
+  const deepGreen = "#1E4C37";
+  const lightMint = "#E8F2ED";
+
+  // Loginstatus (voor CTA's)
+  const token = (await cookies()).get("session")?.value || "";
+  const JWT_SECRET = process.env.JWT_SECRET || "";
+  let loggedIn = false;
+  try {
+    if (JWT_SECRET && token) {
+      const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & { role?: string };
+      loggedIn = Boolean(payload);
+    }
+  } catch {
+    loggedIn = false;
+  }
 
   return (
     <main className="min-h-screen text-zinc-900 bg-white">
@@ -28,22 +43,42 @@ export default function AdminiFlexHomepage() {
               ledenadministratie, offertes, contracten, rapportages en meer.
               Eenvoudig, professioneel en klaar voor de groei van uw organisatie.
             </p>
+
+            {/* CTA's afhankelijk van login */}
             <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href="#cta"
-                className="px-5 py-3 rounded-md text-white font-medium"
-                style={{ backgroundColor: oldGreen }}
-              >
-                Start gratis
-              </a>
-              <a
-                href="#pricing"
-                className="px-5 py-3 rounded-md font-medium border"
-                style={{ borderColor: oldGreen, color: oldGreen }}
-              >
-                Bekijk prijzen
-              </a>
+              {!loggedIn ? (
+                <>
+                  <a
+                    href="#cta"
+                    className="px-5 py-3 rounded-md text-white font-medium"
+                    style={{ backgroundColor: oldGreen }}
+                  >
+                    Start gratis
+                  </a>
+                  {/* "Bekijk prijzen" verwijderd */}
+                </>
+              ) : (
+                <>
+                  <form action="/api/logout" method="POST">
+                    <button
+                      type="submit"
+                      className="px-5 py-3 rounded-md text-white font-medium"
+                      style={{ backgroundColor: oldGreen }}
+                    >
+                      Uitloggen
+                    </button>
+                  </form>
+                  <a
+                    href="/kennisbank"
+                    className="px-5 py-3 rounded-md font-medium border"
+                    style={{ borderColor: oldGreen, color: oldGreen }}
+                  >
+                    Kennisbank
+                  </a>
+                </>
+              )}
             </div>
+
             <div className="mt-6 flex flex-wrap gap-3 text-sm">
               <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
                 PSD2-bankkoppeling
@@ -77,7 +112,6 @@ export default function AdminiFlexHomepage() {
               ))}
             </div>
 
-            {/* Echte grafiek (client component) */}
             <RevenueChart />
           </div>
         </div>
@@ -128,96 +162,29 @@ export default function AdminiFlexHomepage() {
         </div>
       </section>
 
-      {/* ===== MODULES ===== */}
+      {/* ===== MODULES (hernoemd) ===== */}
       <section id="modules" className="max-w-6xl mx-auto px-4 md:px-6 py-16">
         <h2 className="text-3xl font-semibold tracking-tight">Modules op maat</h2>
         <p className="mt-2 text-zinc-700">Activeer alleen wat je nodig hebt.</p>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           <div className="p-6 rounded-xl border">
-            <h3 className="font-medium" style={{ color: oldGreen }}>
-              Vereniging
-            </h3>
+            <h3 className="font-medium" style={{ color: oldGreen }}>Verenigingen</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Met of zonder leden. Ledenadministratie, contributie, kas/bank, rapporten.
+              Ledenadministratie, contributies, kas/bank, rapportages. Met of zonder leden.
             </p>
           </div>
           <div className="p-6 rounded-xl border">
-            <h3 className="font-medium" style={{ color: oldGreen }}>
-              Webshop / Handel
-            </h3>
+            <h3 className="font-medium" style={{ color: oldGreen }}>Handel</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Voorraadbeheer (gem. kostprijs), marge per product, Mollie & Klarna, btw.
+              Inkoop/Verkoop, voorraad (gem. kostprijs), marges, openstaande posten.
             </p>
           </div>
           <div className="p-6 rounded-xl border">
-            <h3 className="font-medium" style={{ color: oldGreen }}>
-              Hovenier / Dienstverlener
-            </h3>
+            <h3 className="font-medium" style={{ color: oldGreen }}>Webshops</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Kostprijscalculatie, offertes → contracten, uren & materialen.
+              Koppelingen (Mollie/Klarna), voorraad, BTW, order- en factuurstromen.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* ===== PRIJZEN ===== */}
-      <section id="pricing" className="max-w-6xl mx-auto px-4 md:px-6 py-16">
-        <h2 className="text-3xl font-semibold tracking-tight">Prijzen</h2>
-        <p className="mt-2 text-zinc-700">
-          Betaal alleen voor wat je gebruikt en klaar voor de toekomst.
-        </p>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              n: "Basic",
-              p: "€12,50",
-              f: ["1 gebruiker", "1 administratie", "Rapportages"],
-            },
-            {
-              n: "Plus",
-              p: "€24,50",
-              f: ["Alles van Basic", "Leden en/of Voorraad", "Bankkoppeling"],
-            },
-            {
-              n: "Pro",
-              p: "€49,50",
-              f: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"],
-            },
-          ].map((plan, i) => (
-            <div
-              key={i}
-              className={`p-6 rounded-xl border ${i === 1 ? "shadow-md" : ""}`}
-              style={i === 1 ? { borderColor: oldGreen } : {}}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">{plan.n}</h3>
-                {i === 1 && (
-                  <span
-                    className="text-xs px-2 py-1 rounded-full text-white"
-                    style={{ backgroundColor: oldGreen }}
-                  >
-                    Meest gekozen
-                  </span>
-                )}
-              </div>
-              <div className="mt-2 text-3xl font-bold">
-                {plan.p}
-                <span className="text-base font-normal text-zinc-600">/mnd</span>
-              </div>
-              <ul className="mt-4 text-sm text-zinc-700 space-y-2">
-                {plan.f.map((x, idx) => (
-                  <li key={idx}>• {x}</li>
-                ))}
-              </ul>
-              <a
-                href="#cta"
-                className="mt-6 inline-block w-full text-center px-4 py-2 rounded-md text-white"
-                style={{ backgroundColor: oldGreen }}
-              >
-                Start nu
-              </a>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -226,24 +193,42 @@ export default function AdminiFlexHomepage() {
         <div className="max-w-6xl mx-auto px-4 md:px-6">
           <div
             className="rounded-2xl p-8 md:p-10 text-white"
-            style={{
-              background: `linear-gradient(90deg, ${deepGreen}, ${oldGreen})`,
-            }}
+            style={{ background: `linear-gradient(90deg, ${deepGreen}, ${oldGreen})` }}
           >
             <h3 className="text-2xl font-semibold">Probeer AdminiFlex vandaag</h3>
-            <p className="mt-1 text-white/90">
-              Maak in 5 minuten je account aan en begin meteen.
-            </p>
+            <p className="mt-1 text-white/90">Maak in 5 minuten je account aan en begin meteen.</p>
+
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href="/contact" className="px-5 py-3 rounded-md bg-white text-zinc-900 font-medium">
-                Neem contact op
-              </a>
-              <a
-                href="#pricing"
-                className="px-5 py-3 rounded-md border border-white/40 text-white font-medium"
-              >
-                Bekijk prijzen
-              </a>
+              {!loggedIn ? (
+                <>
+                  <a href="/login" className="px-5 py-3 rounded-md bg-white text-zinc-900 font-medium">
+                    Inloggen
+                  </a>
+                  <a
+                    href="/contact"
+                    className="px-5 py-3 rounded-md border border-white/40 text-white font-medium"
+                  >
+                    Neem contact op
+                  </a>
+                </>
+              ) : (
+                <>
+                  <form action="/api/logout" method="POST">
+                    <button
+                      type="submit"
+                      className="px-5 py-3 rounded-md bg-white text-zinc-900 font-medium"
+                    >
+                      Uitloggen
+                    </button>
+                  </form>
+                  <a
+                    href="/kennisbank"
+                    className="px-5 py-3 rounded-md border border-white/40 text-white font-medium"
+                  >
+                    Kennisbank
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </div>

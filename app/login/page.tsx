@@ -4,7 +4,6 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const oldGreen = "#2F6B4F";
-
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -30,7 +29,6 @@ export default function LoginPage() {
         throw new Error(body?.error || "Inloggen mislukt");
       }
 
-      // Naar admin-dash
       window.location.href = "/admin";
     } catch (e: any) {
       const map: Record<string, string> = {
@@ -58,7 +56,7 @@ export default function LoginPage() {
               name="username"
               autoComplete="username"
               className="w-full border rounded-md px-3 py-2"
-              placeholder="admin"
+              placeholder="Gebruikersnaam"
               required
             />
           </div>

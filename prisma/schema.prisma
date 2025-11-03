@@ -1,0 +1,92 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  number     String   @unique // KL-2025-0001
+  name       String
+  email      String   @unique
+  username   String   @unique
+  status     String   @default("active") // active|inactive
+  planId     String
+  plan       Plan     @relation(fields: [planId], references: [id])
+  modules    Json?
+  createdAt  DateTime @default(now())
+
+  contracts  Contract[]
+  invoices   Invoice[]
+  tickets    Ticket[]
+  comms      Communication[]
+  files      File[]
+}
+
+model Plan {
+  id         String   @id @default(cuid())
+  code       String   @unique // BASIC|PLUS|PRO
+  name       String
+  priceCents Int
+  features   Json
+
+  customers  Customer[]
+}
+
+model Contract {
+  id           String   @id @default(cuid())
+  customerId   String
+  Customer     Customer @relation(fields: [customerId], references: [id])
+  planCode     String
+  termMonths   Int
+  cpiIndexed   Boolean  @default(true)
+  noticeMonths Int      @default(3)
+  startDate    DateTime
+  endDate      DateTime
+  pdfUrl       String?
+  status       String   @default("draft") // draft|sent|signed|active|terminated
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  customerId  String
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  subject     String
+  status      String   @default("open") // open|pending|closed
+  createdAt   DateTime @default(now())
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  customerId  String
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  number      String   @unique // FACT-2025-0001
+  totalCents  Int
+  status      String   @default("open") // open|paid|overdue|canceled
+  pdfUrl      String?
+  createdAt   DateTime @default(now())
+}
+
+model Communication {
+  id          String   @id @default(cuid())
+  customerId  String
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  channel     String   // email|phone|note
+  subject     String?
+  body        String?
+  createdAt   DateTime @default(now())
+}
+
+model File {
+  id          String   @id @default(cuid())
+  customerId  String
+  Customer    Customer @relation(fields: [customerId], references: [id])
+  kind        String   // contract|attachment|other
+  name        String
+  url         String
+  createdAt   DateTime @default(now())
+}
