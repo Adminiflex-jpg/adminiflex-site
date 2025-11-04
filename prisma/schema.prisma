@@ -90,3 +90,14 @@ model File {
   url         String
   createdAt   DateTime @default(now())
 }
+model User {
+  id             String   @id @default(cuid())
+  username       String   @unique
+  passwordHash   String
+  role           String   @default("user")
+  totpEnabled    Boolean  @default(true)
+  totpSecret     String?  // Base32 secret voor Microsoft Authenticator
+  recoveryHashes String[] @default([]) // gehashte herstelcodes (optioneel)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
