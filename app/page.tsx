@@ -146,7 +146,7 @@ export default async function AdminiFlexHomepage() {
           <div className="p-6 rounded-xl border">
             <h3 className="font-medium" style={{ color: oldGreen }}>Verenigingen</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Ledenadministratie, contributies, kas/bank, rapportages. Met of zonder leden.
+              Ledenadministratie, contributies, kas/bank, voorraadbeheer, rapportages.
             </p>
           </div>
           <div className="p-6 rounded-xl border">
@@ -167,12 +167,12 @@ export default async function AdminiFlexHomepage() {
       {/* ===== PRIJZEN ===== */}
       <section id="pricing" className="max-w-6xl mx-auto px-4 md:px-6 py-16">
         <h2 className="text-3xl font-semibold tracking-tight">Prijzen & pakketten</h2>
-        <p className="mt-2 text-zinc-700">Betaal alleen voor wat je gebruikt.</p>
+        <p className="mt-2 text-zinc-700">Betaal alleen voor wat je nodig hebt.</p>
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { name: "Basic", price: "€12,50",  features: ["Boekhouding & btw", "Export CSV/PDF", "1 gebruiker"] },
-            { name: "Plus",  price: "€24,50", features: ["Alles van Basic", "Leden of Voorraad", "Openstaande posten"] },
+            { name: "Basic", price: "€12,50",  features: ["Boekhouding & btw", "1 administratie", "1 gebruiker", "150 facturen per maand"] },
+            { name: "Plus",  price: "€24,50", features: ["Alles van Basic", "Leden of Voorraad", "Openstaande posten", "300 facturen per maaand"] },
             { name: "Pro",   price: "€49,50", features: ["Alles van Plus", "Offertes & Contracten", "API & Webhooks"] },
           ].map((p, i) => (
             <div key={i} className={`rounded-xl border bg-white p-6 ${i === 1 ? "shadow-lg border-emerald-400" : ""}`}>
@@ -197,7 +197,7 @@ export default async function AdminiFlexHomepage() {
                 className="mt-6 inline-block w-full text-center px-4 py-2 rounded-md text-white"
                 style={{ backgroundColor: oldGreen }}
               >
-                Vraag demo aan
+                Meld je nu aan
               </a>
             </div>
           ))}
@@ -222,7 +222,7 @@ export default async function AdminiFlexHomepage() {
                 href="/contact"
                 className="px-5 py-3 rounded-md bg-white text-zinc-900 font-medium inline-block"
               >
-                Vraag demo aan
+                Meld je nu aan
               </a>
             </div>
           </div>

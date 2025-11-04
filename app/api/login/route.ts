@@ -15,17 +15,17 @@ export async function POST(req: Request) {
   // const user = await prisma.user.findUnique({ where: { username } });
   // DEMO fallback (vervang met DB):
   const user =
-    username === "admin"
-      ? {
-          id: "demo-admin",
-          username: "admin",
-          passwordHash:
-            "$2a$10$5x1lKtxm8x8R0bZsV3X3z.OPsK9q2S0N6uCz6n1tqg7g4yH9kC2r2", // bcrypt hash van: Admin123!
-          role: "admin",
-          totpEnabled: true,
-          totpSecret: "KVKQ4KIKNZTSA===",
-        }
-      : null;
+  username.toLowerCase() === "admin"
+    ? {
+        id: "demo-admin",
+        username: "admin",
+        passwordHash: "$2b$10$FymYy6ShmigZy2CiAOadPucPVgAa3jWluoPOl3V3MGV1hgKcbwZ6G-FransHals43!",
+        role: "admin",
+        totpEnabled: false,
+        totpSecret: null,
+      }
+    : null;
+
 
   if (!user) {
     return NextResponse.redirect(new URL("/login?error=Onbekende%20gebruiker", req.url));
