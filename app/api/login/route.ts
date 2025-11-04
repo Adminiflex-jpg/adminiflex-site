@@ -1,44 +1,47 @@
+// app/api/login/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { comparePassword, signSession } from "@/lib/auth";
 import jwt from "jsonwebtoken";
-// import { prisma } from "@/lib/prisma"; // als je prisma gebruikt
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 
+/**
+ * Tijdelijke DEMO-login:
+ *  - gebruikersnaam: Admin  (case-insensitive)
+ *  - wachtwoord: FransHals43!
+ *  - stuurt ALTIJD door naar /2fa (totpEnabled = true)
+ *  - pre2fa cookie bevat user-id, wordt op /2fa gecontroleerd
+ *
+ * Later vervangen door een echte DB lookup + bcrypt check.
+ */
 export async function POST(req: Request) {
   const form = await req.formData();
-  const username = String(form.get("username") || "");
+  const username = String(form.get("username") || "").trim().toLowerCase();
   const password = String(form.get("password") || "");
 
-  // ---- Haal user op uit DB ----
-  // const user = await prisma.user.findUnique({ where: { username } });
-  // DEMO fallback (vervang met DB):
-  const user =
-  username.toLowerCase() === "admin"
-    ? {
-        id: "demo-admin",
-        username: "admin",
-        passwordHash: "$2b$10$FymYy6ShmigZy2CiAOadPucPVgAa3jWluoPOl3V3MGV1hgKcbwZ6G-FransHals43!",
-        role: "admin",
-        totpEnabled: false,
-        totpSecret: null,
-      }
-    : null;
+  // 1) DEMO-USER: vervang dit straks door Prisma (prisma.user.findUnique)
+  const demoUser = {
+    id: "demo-admin",
+    username: "admin",
+    role: "admin",
+    // zet 2FA aan zodat je de 2FA-pagina krijgt
+    totpEnabled: true,
+    // vul hier later je echte base32-secret in na setup
+    totpSecret: "KVKQ4KIKNZTSA===",
+  };
 
-
-  if (!user) {
+  // 2) Check demo-credentials
+  const userOk = username === "admin" && password === "FransHals43!";
+  if (!userOk) {
+    // foutmelding terug naar login
     return NextResponse.redirect(new URL("/login?error=Onbekende%20gebruiker", req.url));
   }
 
-  const ok = await comparePassword(password, user.passwordHash);
-  if (!ok) {
-    return NextResponse.redirect(new URL("/login?error=Onjuist%20wachtwoord", req.url));
-  }
-
-  // als 2FA UIT staat → direct door
-  if (!user.totpEnabled) {
-    const session = signSession({ uid: user.id, role: user.role });
+  // 3) Als 2FA uit zou staan => direct sessie en naar /admin
+  if (!demoUser.totpEnabled) {
+    const session = jwt.sign({ uid: demoUser.id, role: demoUser.role }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
     const res = NextResponse.redirect(new URL("/admin", req.url));
     res.headers.append(
       "Set-Cookie",
@@ -47,9 +50,12 @@ export async function POST(req: Request) {
     return res;
   }
 
-  // 2FA AAN → zet tijdelijke cookie en ga naar /2fa
-  const pre2fa = jwt.sign({ uid: user.id }, JWT_SECRET, { expiresIn: "10m" });
+  // 4) 2FA AAN -> zet tijdelijke pre2fa-cookie en stuur naar /2fa
+  const pre2fa = jwt.sign({ uid: demoUser.id }, JWT_SECRET, { expiresIn: "10m" });
   const res = NextResponse.redirect(new URL("/2fa", req.url));
-  res.headers.append("Set-Cookie", `pre2fa=${pre2fa}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60 * 10}`);
+  res.headers.append(
+    "Set-Cookie",
+    `pre2fa=${pre2fa}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60 * 10}`
+  );
   return res;
 }
