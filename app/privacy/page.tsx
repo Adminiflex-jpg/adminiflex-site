@@ -1,52 +1,171 @@
+// app/privacy/page.tsx
+import React from "react";
+
+export const metadata = {
+  title: "Privacyverklaring – AdminiFlex",
+  description: "Privacyverklaring van AdminiFlex B.V.",
+};
+
 export default function PrivacyPage() {
-    return (
-      <main className="max-w-3xl mx-auto px-4 md:px-6 py-16 prose prose-zinc">
-        <h1>Privacyverklaring</h1>
-        <p><strong>Versie:</strong> 2025-11-01</p>
-  
+  const oldGreen = "#2F6B4F";
+
+  return (
+    <main className="max-w-4xl mx-auto px-4 md:px-6 py-12">
+      <header className="mb-6">
+        <h1 className="text-3xl font-semibold tracking-tight">Privacyverklaring – AdminiFlex</h1>
+        <p className="text-sm text-zinc-600 mt-2">Versie: 2025-11-10</p>
+      </header>
+
+      <article className="prose prose-zinc max-w-none">
+        <h2>1. Inleiding</h2>
         <p>
-          Deze privacyverklaring is van toepassing op de verwerking van persoonsgegevens door
-          <strong> AdminiFlex</strong> (“wij”, “ons”, “onze”). Wij respecteren jouw privacy en
-          verwerken persoonsgegevens in overeenstemming met de AVG.
+        <br /><br />
+          Deze privacyverklaring beschrijft hoe AdminiFlex omgaat met persoonsgegevens van
+          klanten en gebruikers van onze SaaS-dienst voor boekhouding, ledenadministratie
+          en voorraadbeheer. Wij verwerken gegevens uitsluitend in overeenstemming met de
+          Algemene Verordening Gegevensbescherming (AVG) en andere relevante wet- en
+          regelgeving.
         </p>
-  
-        <h2>Welke gegevens verwerken wij?</h2>
+        <p>
+          AdminiFlex richt zich uitsluitend op zakelijke klanten (B2B). Deze verklaring is
+          bedoeld voor onze klanten, hun medewerkers en contactpersonen.
+        </p>
+        <br /><br />
+        <h2>2. Wie is verantwoordelijk?</h2>
+        <br /><br />
+        <p><strong>AdminiFlex</strong><br />
+          E-mail: <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a><br />
+          Website: <a href="https://www.adminiflex.nl" style={{ color: oldGreen }}>www.adminiflex.nl</a>
+        </p>
+        <p>
+          AdminiFlex is verwerkingsverantwoordelijke voor de verwerking van persoonsgegevens
+          binnen de eigen dienstverlening.
+        </p>
+        <br /><br />
+        <h2>3. Welke persoonsgegevens verwerken wij?</h2>
+        <br /><br />
+        <p>Afhankelijk van het gebruik van onze diensten kunnen wij de volgende categorieën gegevens verwerken:</p>
         <ul>
-          <li>Identificatie- en contactgegevens (naam, e-mail, telefoon).</li>
-          <li>Account- en gebruiksgegevens (login, logbestanden, voorkeuren).</li>
-          <li>Factuur- en betaalgegevens (factuuradres, transactiegegevens via onze betaalpartners).</li>
-          <li>Supportcommunicatie en formulierinzendingen.</li>
+          <li><strong>Identificatie- en contactgegevens:</strong> naam, e-mail, telefoonnummer.</li>
+          <li><strong>Accountgegevens:</strong> gebruikersnaam, login- en voorkeurinstellingen.</li>
+          <li><strong>Administratieve gegevens:</strong> factuur- en betaalinformatie (factuuradres, IBAN, btw-nummer).</li>
+          <li><strong>Supportgegevens:</strong> berichten via contactformulieren of e-mail.</li>
+          <li><strong>Gebruiksgegevens:</strong> technische logbestanden (tijdstip, IP-adres, browser, foutmeldingen).</li>
         </ul>
-  
-        <h2>Doeleinden en grondslagen</h2>
+        <p>Wij verwerken géén bijzondere persoonsgegevens (zoals gezondheidsgegevens of politieke opvattingen).</p>
+        <br /><br />
+        <h2>4. Doeleinden van verwerking</h2>
+        <br /><br />
+        <p>Wij gebruiken persoonsgegevens uitsluitend voor:</p>
         <ul>
-          <li>Uitvoering van de overeenkomst (account, dienstverlening, facturatie).</li>
-          <li>Gerechtvaardigd belang (verbetering dienst, beveiliging, misbruikpreventie).</li>
-          <li>Toestemming (nieuwsbrief, marketingcookies).</li>
-          <li>Wettelijke verplichting (fiscale bewaarplicht).</li>
+          <li>Het aanmaken en beheren van gebruikersaccounts.</li>
+          <li>Het leveren van onze online diensten (boekhouding, leden- en voorraadbeheer).</li>
+          <li>Klantondersteuning en communicatie.</li>
+          <li>Facturatie en naleving van wettelijke verplichtingen.</li>
+          <li>Verbetering van onze software en beveiliging.</li>
         </ul>
-  
-        <h2>Bewaartermijnen</h2>
-        <p>Wij bewaren gegevens niet langer dan noodzakelijk: financiële gegevens conform wettelijke termijnen; overige gegevens zo kort mogelijk.</p>
-  
-        <h2>Delen met derden</h2>
-        <p>Wij delen uitsluitend met verwerkers die namens ons diensten leveren, zoals hosting (Netlify), e-mail (Zoho Mail), versiebeheer (GitHub), analytics en betaalproviders. Er worden verwerkersovereenkomsten gesloten.</p>
-  
-        <h2>Beveiliging</h2>
-        <p>Wij treffen passende technische en organisatorische maatregelen (TLS, toegangsbeheer, back-ups, least-privilege).</p>
-  
-        <h2>Jouw rechten</h2>
-        <p>Je hebt recht op inzage, rectificatie, verwijdering, beperking, dataportabiliteit en bezwaar. Neem contact op via <a href="mailto:info@adminiflex.nl">info@adminiflex.nl</a>.</p>
-  
-        <h2>Cookies</h2>
-        <p>Functionele cookies voor de werking van de site. Analytics/marketingcookies uitsluitend met toestemming.</p>
-  
-        <h2>Contact</h2>
-        <p>AdminiFlex — e-mail: <a href="mailto:info@adminiflex.nl">info@adminiflex.nl</a></p>
-  
-        <h2>Wijzigingen</h2>
-        <p>Wij kunnen deze verklaring aanpassen. De meest recente versie staat altijd op deze pagina.</p>
-      </main>
-    );
-  }
-  
+        <p>Wij gebruiken gegevens niet voor marketingdoeleinden of geautomatiseerde besluitvorming/profilering.</p>
+        <br /><br />
+        <h2>5. Grondslagen</h2>
+        <br /><br />
+        <ul>
+          <li>Uitvoering van een overeenkomst (het leveren van onze SaaS-dienst);</li>
+          <li>Wettelijke verplichting (fiscale bewaarplicht, boekhouding);</li>
+          <li>Gerechtvaardigd belang (beveiliging en verbetering van onze diensten).</li>
+        </ul>
+        <br /><br />
+        <h2>6. Bewaartermijnen</h2>
+        <br /><br />
+        <ul>
+          <li>Factuur- en financiële gegevens: 7 jaar (wettelijke bewaarplicht).</li>
+          <li>Gebruiks- en accountgegevens: maximaal 12 maanden na beëindiging van het contract.</li>
+          <li>Supportberichten: maximaal 1 jaar.</li>
+        </ul>
+        <p>Daarna worden gegevens verwijderd of geanonimiseerd.</p>
+        <br /><br />
+        <h2>7. Delen van gegevens met derden</h2>
+        <br /><br />
+        <p>
+          Wij delen persoonsgegevens alleen met partijen die ons ondersteunen bij de
+          uitvoering van onze diensten. Deze partijen handelen als verwerkers in opdracht
+          van AdminiFlex en zijn contractueel gebonden aan geheimhouding en beveiliging
+          conform de AVG.
+        </p>
+        <p>Tot onze verwerkers behoren o.a.:</p>
+        <ul>
+          <li>Netlify – hosting en infrastructuur.</li>
+          <li>Zoho Mail – e-mailcommunicatie.</li>
+          <li>GitHub – broncodebeheer en deployment.</li>
+          <li>(Toekomstig) Betaal- en integratiepartners zoals banken, Mollie, Belastingdienst of Shopify.</li>
+        </ul>
+        <p>Met alle verwerkers wordt een verwerkersovereenkomst (DPA) afgesloten. Wij verkopen geen persoonsgegevens aan derden.</p>
+        <br /><br />
+        <h2>8. Beveiliging</h2>
+        <br /><br />
+        <p>AdminiFlex treft passende technische en organisatorische maatregelen om gegevens te beschermen, waaronder:</p>
+        <ul>
+          <li>Versleutelde verbindingen (TLS/HTTPS, HSTS).</li>
+          <li>Versleutelde opslag en back-ups.</li>
+          <li>Toegangsbeheer volgens het least-privilege principe.</li>
+          <li>Logging en monitoring van toegang en wijzigingen.</li>
+          <li>Regelmatige updates en afhankelijkheids-controles.</li>
+        </ul>
+        <br /><br />
+        <h2>9. Cookies</h2>
+        <p>
+        <br /><br />
+          Onze website gebruikt alleen functionele cookies die noodzakelijk zijn voor de
+          werking van de site en het inloggen in de SaaS-omgeving. Er worden geen analytische
+          of marketingcookies geplaatst zonder toestemming.
+        </p>
+        <br /><br />
+        <h2>10. Rechten van betrokkenen</h2>
+        <br /><br />
+        <p>Betrokkenen hebben recht op:</p>
+        <ul>
+          <li>Inzage in hun persoonsgegevens.</li>
+          <li>Rectificatie of verwijdering van gegevens.</li>
+          <li>Beperking of bezwaar tegen verwerking.</li>
+          <li>Overdraagbaarheid van gegevens (dataportabiliteit).</li>
+        </ul>
+        <p>
+          Verzoeken kunnen worden gestuurd naar{" "}
+          <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a>.
+          Wij reageren binnen uiterlijk 30 dagen.
+        </p>
+        <br /><br />
+        <h2>11. Internationale doorgifte</h2>
+        <br /><br />
+        <p>
+          Onze gegevens worden primair opgeslagen binnen de EU. Indien gegevens buiten de
+          EER worden verwerkt (bijv. door Amerikaanse cloudproviders), zorgen wij voor
+          passende waarborgen conform artikel 46 AVG (EU-US Data Privacy Framework of
+          standaardcontractbepalingen).
+        </p>
+        <br /><br />
+        <h2>12. Beleid bij datalekken</h2>
+        <br /><br />
+        <p>
+          Bij een vermoeden van een beveiligingsincident of datalek meldt AdminiFlex dit
+          onmiddellijk bij de Autoriteit Persoonsgegevens en — indien relevant — bij de
+          betrokken klanten binnen 72 uur na ontdekking.
+        </p>
+        <br /><br />
+        <h2>13. Wijzigingen</h2>
+        <br /><br />
+        <p>
+          AdminiFlex behoudt zich het recht voor deze privacyverklaring aan te passen bij
+          wijzigingen in wetgeving of bedrijfsvoering. De actuele versie is altijd
+          beschikbaar op{" "}
+          <a href="/privacy" style={{ color: oldGreen }}>www.adminiflex.nl/privacy</a>.
+        </p>
+        <br /><br />
+        <h2>14. Contact</h2>
+        <br /><br />
+        <p className="mb-0"><strong>AdminiFlex</strong></p>
+        <p className="mb-0">E-mail: <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a></p>
+        <p>Website: <a href="https://www.adminiflex.nl" style={{ color: oldGreen }}>www.adminiflex.nl</a></p>
+      </article>
+    </main>
+  );
+}

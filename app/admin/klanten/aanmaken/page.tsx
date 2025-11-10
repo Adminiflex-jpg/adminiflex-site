@@ -1,0 +1,209 @@
+// app/admin/klanten/aanmaken/page.tsx
+import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import Link from "next/link";
+
+const prisma = new PrismaClient();
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export default async function AanmakenPage({ searchParams }: { searchParams?: { app?: string } }) {
+  // auth (zoals je elders doet)
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value || "";
+  const JWT_SECRET = process.env.JWT_SECRET || "";
+  let isAdmin = false;
+  try {
+    if (JWT_SECRET && token) {
+      const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & { role?: string };
+      isAdmin = payload?.role === "admin";
+    }
+  } catch {}
+  if (!isAdmin) return <div className="p-8">Geen toegang</div>;
+
+  // als je via link komt met ?app=id → prefill
+  const appId = searchParams?.app;
+  const app = appId ? await prisma.application.findUnique({ where: { id: appId } }) : null;
+
+  // basis contract HTML
+  const contractHtml = buildContractHtml({
+    companyName: app?.companyName ?? "",
+    contactName: app?.contactName ?? "",
+    address: app?.address ?? "",
+    postalCode: app?.postalCode ?? "",
+    city: app?.city ?? "",
+    email: app?.email ?? "",
+    kvk: app?.kvk ?? "",
+    btw: app?.btw ?? "",
+    plan: app?.plan ?? "BASIC",
+  });
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 md:px-6 py-10">
+      <h1 className="text-2xl font-semibold">Klant aanmaken {app ? "(prefill van aanmelding)" : ""}</h1>
+
+      <form method="POST" action="/api/admin/customers/create" className="mt-6 grid gap-3">
+        <input type="hidden" name="applicationId" defaultValue={app?.id ?? ""} />
+        <div className="grid md:grid-cols-2 gap-3">
+          <input name="companyName" defaultValue={app?.companyName ?? ""} placeholder="Bedrijfsnaam" className="border rounded-md px-3 py-2" required />
+          <input name="contactName" defaultValue={app?.contactName ?? ""} placeholder="Contactpersoon" className="border rounded-md px-3 py-2" required />
+        </div>
+        <input name="address" defaultValue={app?.address ?? ""} placeholder="Adres" className="border rounded-md px-3 py-2" required />
+        <div className="grid md:grid-cols-3 gap-3">
+          <input name="postalCode" defaultValue={app?.postalCode ?? ""} placeholder="Postcode" className="border rounded-md px-3 py-2" required />
+          <input name="city" defaultValue={app?.city ?? ""} placeholder="Plaats" className="border rounded-md px-3 py-2" required />
+          <input type="email" name="email" defaultValue={app?.email ?? ""} placeholder="E-mail" className="border rounded-md px-3 py-2" required />
+        </div>
+        <div className="grid md:grid-cols-2 gap-3">
+          <input name="kvk" defaultValue={app?.kvk ?? ""} placeholder="KVK-nummer" className="border rounded-md px-3 py-2" required />
+          <input name="btw" defaultValue={app?.btw ?? ""} placeholder="BTW-nummer" className="border rounded-md px-3 py-2" required />
+        </div>
+        <div>
+          <label className="mr-3 text-sm">Pakket</label>
+          <select name="plan" defaultValue={app?.plan ?? "BASIC"} className="border rounded-md px-3 py-2">
+            <option value="BASIC">Basic</option>
+            <option value="PLUS">Plus</option>
+            <option value="PRO">Pro</option>
+          </select>
+        </div>
+
+        {/* Contract editor */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium mb-2">Concept contract (bewerkbaar)</label>
+          <textarea name="contractHtml" defaultValue={contractHtml} rows={16} className="w-full border rounded-md px-3 py-2 font-mono text-sm" />
+          <div className="text-xs text-zinc-600 mt-1">
+            Tip: dit is een template. Laat de definitieve versie juridisch toetsen.
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="submit"
+            name="action"
+            value="save-draft"
+            className="px-4 py-2 rounded-md border"
+            style={{ borderColor: "#2F6B4F", color: "#2F6B4F" }}
+          >
+            Opslaan als concept
+          </button>
+          <button
+            type="submit"
+            name="action"
+            value="send-sign"
+            className="px-4 py-2 rounded-md text-white"
+            style={{ backgroundColor: "#2F6B4F" }}
+          >
+            Verstuur ter ondertekening
+          </button>
+        </div>
+      </form>
+    </main>
+  );
+}
+
+function buildContractHtml(p: {
+    companyName: string; contactName: string; address: string; postalCode: string; city: string;
+    email: string; kvk: string; btw: string; plan: string;
+  }) {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    return `
+  <h1>Overeenkomst Software-as-a-Service (SaaS) – AdminiFlex B.V.</h1>
+  <p><strong>Versie:</strong> 2025-11-10<br/>
+  <strong>Datum van ondertekening:</strong> ${today}</p>
+  
+  <h2><strong>Artikel 1 – Partijen</strong></h2>
+  <p><strong>Leverancier:</strong> AdminiFlex B.V., gevestigd te [adres invullen], ingeschreven bij de Kamer van Koophandel onder nummer [KvK invullen], BTW-nummer [BTW invullen], rechtsgeldig vertegenwoordigd door [naam invullen], in de hoedanigheid van oprichter/directeur, hierna: <em>Leverancier</em>.</p>
+  <p><strong>Klant:</strong> ${p.companyName} (KVK: ${p.kvk}, BTW: ${p.btw}), ${p.address}, ${p.postalCode} ${p.city}, t.a.v. ${p.contactName} &lt;${p.email}&gt;, hierna: <em>Klant</em>.</p>
+  
+  <h2><strong>Artikel 2 – Doel en aard van de dienst</strong></h2>
+  <ol>
+    <li>Leverancier biedt via <a href="https://www.adminiflex.nl">www.adminiflex.nl</a> een online softwareapplicatie aan onder de naam AdminiFlex (de <em>Dienst</em>).</li>
+    <li>De Dienst richt zich op ondernemingen, verenigingen en zelfstandigen (zzp, mkb en grotere organisaties) voor digitale boekhouding, ledenadministratie, offertes/contracten en rapportages.</li>
+    <li>De Dienst stelt Klant in staat administratieve en boekhoudkundige taken te automatiseren, rapportages te genereren en financiële transacties te registreren.</li>
+    <li>Leverancier levert uitsluitend technische ondersteuning omtrent de werking van de software; er wordt geen fiscaal, juridisch of boekhoudkundig advies verstrekt.</li>
+  </ol>
+  
+  <h2><strong>Artikel 3 – Duur, verlenging en opzegging</strong></h2>
+  <ol>
+    <li>De Overeenkomst wordt aangegaan voor onbepaalde tijd, tenzij schriftelijk anders overeengekomen.</li>
+    <li>Klant kiest bij aanvang voor een maand- of jaarabonnement (gekozen pakket: <strong>${p.plan}</strong>).</li>
+    <li>Bij maandabonnementen geldt een opzegtermijn van één (1) maand.</li>
+    <li>Bij jaarabonnementen geldt een opzegtermijn van drie (3) maanden vóór het einde van de contractperiode.</li>
+    <li>Jaarcontracten worden automatisch verlengd met telkens twaalf (12) maanden, tenzij tijdig opgezegd.</li>
+    <li>Nieuwe klanten ontvangen een proefperiode van dertig (30) dagen waarin de Dienst kosteloos gebruikt mag worden.</li>
+  </ol>
+  
+  <h2><strong>Artikel 4 – Prijzen en betaling</strong></h2>
+  <ol>
+    <li>Tarieven (excl. btw): Basic € 12,50 p/m; Plus € 24,50 p/m; Pro € 49,50 p/m.</li>
+    <li>Facturatie vindt maandelijks achteraf plaats, tenzij anders overeengekomen.</li>
+    <li>Betalingstermijn: 14 dagen na factuurdatum.</li>
+    <li>Leverancier kan tarieven jaarlijks indexeren of aanpassen met een aankondigingstermijn van minimaal 30 dagen.</li>
+  </ol>
+  
+  <h2><strong>Artikel 5 – Hosting en beschikbaarheid</strong></h2>
+  <ol>
+    <li>De Dienst wordt gehost via Netlify, met databeheer en beveiliging conform Europese wetgeving.</li>
+    <li>Leverancier streeft naar hoge beschikbaarheid, maar kan geen absolute uptime garanderen.</li>
+    <li>Onderhoud vindt bij voorkeur buiten kantooruren plaats; storingen worden zo spoedig mogelijk verholpen.</li>
+  </ol>
+  
+  <h2><strong>Artikel 6 – Privacy en gegevensbescherming</strong></h2>
+  <ol>
+    <li>Partijen erkennen dat persoonsgegevens worden verwerkt bij gebruik van de Dienst.</li>
+    <li>Leverancier handelt conform de AVG. Bij invoer van persoonsgegevens door Klant geldt Klant als verwerkingsverantwoordelijke en Leverancier als verwerker.</li>
+    <li>Op verzoek sluiten partijen een verwerkersovereenkomst (DPA) waarin verwerking en beveiliging nader zijn geregeld.</li>
+    <li>Data wordt veilig opgeslagen in een online database gehost door Netlify. Passende technische en organisatorische maatregelen zijn van toepassing.</li>
+  </ol>
+  
+  <h2><strong>Artikel 7 – Intellectuele eigendom</strong></h2>
+  <ol>
+    <li>Alle IE-rechten op software, broncode, ontwerpen en documentatie berusten volledig bij Leverancier.</li>
+    <li>Klant krijgt een niet-exclusief, niet-overdraagbaar en herroepbaar gebruiksrecht voor de duur van de Overeenkomst.</li>
+    <li>Het is Klant verboden de software te kopiëren, wijzigen, sublicentiëren, verhuren of reverse-engineeren zonder voorafgaande schriftelijke toestemming.</li>
+  </ol>
+  
+  <h2><strong>Artikel 8 – Aansprakelijkheid</strong></h2>
+  <ol>
+    <li>Leverancier is niet aansprakelijk voor indirecte schade, gevolgschade, winstderving of verlies van gegevens.</li>
+    <li>De totale aansprakelijkheid is beperkt tot het bedrag dat Klant in de laatste drie (3) maanden aan abonnementskosten heeft voldaan, met een maximum van € 10.000.</li>
+    <li>Leverancier is niet verantwoordelijk voor fouten die voortvloeien uit onjuiste of onvolledige gegevensinvoer door Klant.</li>
+  </ol>
+  
+  <h2><strong>Artikel 9 – Beëindiging</strong></h2>
+  <ol>
+    <li>Beide partijen kunnen de Overeenkomst beëindigen met inachtneming van de toepasselijke opzegtermijn.</li>
+    <li>Na beëindiging blijft de Dienst 30 dagen beschikbaar om data te exporteren.</li>
+    <li>Daarna worden gegevens verwijderd, tenzij wettelijke bewaarplicht anders voorschrijft.</li>
+  </ol>
+  
+  <h2><strong>Artikel 10 – Toepasselijk recht en bevoegde rechter</strong></h2>
+  <ol>
+    <li>Op deze Overeenkomst is Nederlands recht van toepassing.</li>
+    <li>Geschillen worden voorgelegd aan de bevoegde rechter te Amsterdam.</li>
+  </ol>
+  
+  <h2><strong>Artikel 11 – Slotbepalingen</strong></h2>
+  <ol>
+    <li>Indien een bepaling nietig of onafdwingbaar blijkt, blijven overige bepalingen onverkort van kracht.</li>
+    <li>Wijzigingen zijn slechts geldig indien schriftelijk overeengekomen.</li>
+  </ol>
+  
+  <h2><strong>Artikel 12 – </strong></h2>
+  <p>Aldus overeengekomen en digitaal rechtsgeldig ondertekend door beide partijen.</p>
+  
+  <p><strong>Leverancier</strong><br/>
+  AdminiFlex B.V.<br/>
+  Naam: [naam vertegenwoordiger]<br/>
+  Functie: Oprichter/Directeur<br/>
+  Datum: ${today}</p>
+  
+  <p><strong>Klant</strong><br/>
+  ${p.companyName}<br/>
+  Naam: ${p.contactName}<br/>
+  Functie: [functie invullen]<br/>
+  Datum: ${today}</p>
+  `.trim();
+  }
+  

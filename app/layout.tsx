@@ -3,17 +3,14 @@ import "./globals.css";
 import React from "react";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import HeaderSwitcher from "./components/HeaderSwitcher";
 
 export const metadata = {
   title: "AdminiFlex",
   description: "De oplossing voor je boekhouding",
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const oldGreen = "#2F6B4F";
   const deepGreen = "#1E4C37";
   const lightMint = "#E8F2ED";
@@ -25,6 +22,7 @@ export default async function RootLayout({
   try {
     if (JWT_SECRET && token) {
       const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & { role?: string };
+      // Als er een geldige sessie is, beschouwen we de gebruiker als ingelogd
       loggedIn = Boolean(payload);
     }
   } catch {
@@ -37,12 +35,13 @@ export default async function RootLayout({
         className="min-h-screen text-zinc-900 flex flex-col"
         style={{ background: `linear-gradient(180deg, ${lightMint} 0%, #ffffff 100%)` }}
       >
-        {/* HEADER */}
+        {/* HEADER (blijft hetzelfde op publiek; schakelt naar admin-menu op /admin als je bent ingelogd) */}
         <header className="sticky top-0 z-40 bg-white border-b md:bg-white/80 md:backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+            {/* Logo */}
             <a href="/" className="flex items-center gap-3">
               <div
-                className="w-9 h-9 rounded-xl relative grid place-items-center text-white font-semibold"
+                className="w-9 h-9 rounded-xl grid place-items-center text-white font-semibold"
                 style={{ background: `linear-gradient(135deg, ${oldGreen}, ${deepGreen})` }}
               >
                 <span className="text-[11px] leading-none select-none">AF</span>
@@ -50,13 +49,10 @@ export default async function RootLayout({
               <span className="font-semibold tracking-tight text-lg">AdminiFlex</span>
             </a>
 
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              <a href="/#features" style={{ color: oldGreen }}>Functionaliteiten</a>
-              <a href="/#modules" style={{ color: oldGreen }}>Modules</a>
-              <a href="/#pricing" style={{ color: oldGreen }}>Prijzen</a>{/* toegevoegd */}
-              <a href="/contact" style={{ color: oldGreen }}>Contact</a>
-            </nav>
+            {/* 👉 Menu-schakelaar: publiek menu vs admin menu */}
+            <HeaderSwitcher loggedIn={loggedIn} oldGreen={oldGreen} />
 
+            {/* Rechts: in-/uitloggen + kennisbank blijven werken zoals voorheen */}
             <div className="flex items-center gap-2">
               {!loggedIn ? (
                 <>
@@ -72,7 +68,7 @@ export default async function RootLayout({
                     className="px-4 py-2 rounded-md text-sm text-white"
                     style={{ backgroundColor: oldGreen }}
                   >
-                    Vraag demo aan {/* tekst aangepast */}
+                    Vraag demo aan
                   </a>
                 </>
               ) : (
@@ -102,7 +98,7 @@ export default async function RootLayout({
         {/* PAGINA-INHOUD */}
         <main className="flex-grow">{children}</main>
 
-        {/* FOOTER */}
+        {/* FOOTER (ongewijzigd) */}
         <footer className="border-t bg-white/70 backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 text-sm text-zinc-600 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -110,7 +106,7 @@ export default async function RootLayout({
                 className="w-8 h-8 rounded-lg grid place-items-center text-white text-[10px] font-semibold"
                 style={{ background: `linear-gradient(135deg, ${oldGreen}, ${deepGreen})` }}
               >
-                AF {/* letters toegevoegd */}
+                AF
               </div>
               <span className="font-medium">AdminiFlex</span>
             </div>
@@ -127,3 +123,11 @@ export default async function RootLayout({
     </html>
   );
 }
+<form action="/api/logout" method="POST">
+  <button
+    type="submit"
+    className="rounded-md bg-emerald-700 text-white px-4 py-2 hover:bg-emerald-800 transition"
+  >
+    Uitloggen
+  </button>
+</form>
