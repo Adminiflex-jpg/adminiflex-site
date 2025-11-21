@@ -1,61 +1,66 @@
 // app/api/login/route.ts
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-
-/**
- * Tijdelijke DEMO-login:
- *  - gebruikersnaam: Admin  (case-insensitive)
- *  - wachtwoord: FransHals43!
- *  - stuurt ALTIJD door naar /2fa (totpEnabled = true)
- *  - pre2fa cookie bevat user-id, wordt op /2fa gecontroleerd
- *
- * Later vervangen door een echte DB lookup + bcrypt check.
- */
 export async function POST(req: Request) {
-  const form = await req.formData();
-  const username = String(form.get("username") || "").trim().toLowerCase();
-  const password = String(form.get("password") || "");
+  try {
+    const form = await req.formData();
+    const username = String(form.get("username") ?? "");
+    const password = String(form.get("password") ?? "");
 
-  // 1) DEMO-USER: vervang dit straks door Prisma (prisma.user.findUnique)
-  const demoUser = {
-    id: "demo-admin",
-    username: "admin",
-    role: "admin",
-    // zet 2FA aan zodat je de 2FA-pagina krijgt
-    totpEnabled: true,
-    // vul hier later je echte base32-secret in na setup
-    totpSecret: "KVKQ4KIKNZTSA===",
-  };
+    const ADMIN_USER = process.env.ADMIN_USER || "";
+    const ADMIN_PASS = process.env.ADMIN_PASS || "";
+    const JWT_SECRET = process.env.JWT_SECRET || "";
 
-  // 2) Check demo-credentials
-  const userOk = username === "admin" && password === "FransHals43!";
-  if (!userOk) {
-    // foutmelding terug naar login
-    return NextResponse.redirect(new URL("/login?error=Onbekende%20gebruiker", req.url));
-  }
+    if (!JWT_SECRET) {
+      return NextResponse.redirect(
+        new URL(
+          "/login?error=Server%20config%20(JWT_SECRET)%20ontbreekt",
+          req.url
+        )
+      );
+    }
 
-  // 3) Als 2FA uit zou staan => direct sessie en naar /admin
-  if (!demoUser.totpEnabled) {
-    const session = jwt.sign({ uid: demoUser.id, role: demoUser.role }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    const res = NextResponse.redirect(new URL("/admin", req.url));
-    res.headers.append(
-      "Set-Cookie",
-      `session=${session}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60 * 60 * 24 * 7}`
+    // ❌ Verkeerde inlog
+    if (username !== ADMIN_USER || password !== ADMIN_PASS) {
+      return NextResponse.redirect(
+        new URL("/login?error=Onjuiste%20inloggegevens", req.url)
+      );
+    }
+
+    // ✅ Geldige inlog:
+    // Maak een "pre-2FA" token met een simpele uid (hier: "admin")
+    const preToken = jwt.sign(
+      { uid: "admin" },
+      JWT_SECRET,
+      { expiresIn: "10m" } // 10 minuten geldig voor 2FA
     );
-    return res;
-  }
 
-  // 4) 2FA AAN -> zet tijdelijke pre2fa-cookie en stuur naar /2fa
-  const pre2fa = jwt.sign({ uid: demoUser.id }, JWT_SECRET, { expiresIn: "10m" });
-  const res = NextResponse.redirect(new URL("/2fa", req.url));
-  res.headers.append(
-    "Set-Cookie",
-    `pre2fa=${pre2fa}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60 * 10}`
-  );
-  return res;
+    // Redirect eerst naar /2fa en zet GEEN definitieve session nog
+    const res = NextResponse.redirect(new URL("/2fa", req.url));
+
+    // Oude session-cookie (als die bestond) opruimen
+    res.cookies.set("session", "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 0,
+    });
+
+    // Nieuwe tijdelijke pre2fa-cookie zetten
+    res.cookies.set("pre2fa", preToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 10, // 10 minuten
+    });
+
+    return res;
+  } catch (e) {
+    return NextResponse.redirect(
+      new URL("/login?error=Onbekende%20fout", req.url)
+    );
+  }
 }
