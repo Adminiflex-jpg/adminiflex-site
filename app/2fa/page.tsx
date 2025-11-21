@@ -1,9 +1,10 @@
+// app/2fa/page.tsx
 export const metadata = { title: "2FA verificatie - AdminiFlex" };
 
 export default function TwoFaPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams?: { error?: string };
 }) {
   const error = searchParams?.error;
 
@@ -13,6 +14,7 @@ export default function TwoFaPage({
       <p className="mt-2 text-sm text-zinc-700">
         Open Microsoft Authenticator en vul je 6-cijferige code in.
       </p>
+
       {error && (
         <p className="mt-2 text-sm text-red-600">
           {decodeURIComponent(error)}
