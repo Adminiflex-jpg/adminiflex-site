@@ -1,22 +1,31 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PlanCode } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.plan.upsert({
-    where: { code: "BASIC" },
+  // voorbeeld seed: voeg demo-klant toe als die niet bestaat
+  await prisma.customer.upsert({
+    where: { number: "KL-2025-0001" },
     update: {},
-    create: { code: "BASIC", name: "Basic", priceCents: 1250, features: { users: 1, admins: 1 } }
+    create: {
+      number: "KL-2025-0001",
+      companyName: "Demo Klant BV",
+      email: "klant@example.com",
+      contactName: "Demo Contact",
+      address: "Demolaan 1",
+      postalCode: "1234AB",
+      city: "Amsterdam",
+      kvk: "12345678",
+      btw: "NL123456789B01",
+      plan: PlanCode.PLUS,
+    }
   });
-  await prisma.plan.upsert({
-    where: { code: "PLUS" },
-    update: {},
-    create: { code: "PLUS", name: "Plus", priceCents: 2450, features: { leden: true, voorraad: true } }
-  });
-  await prisma.plan.upsert({
-    where: { code: "PRO" },
-    update: {},
-    create: { code: "PRO", name: "Pro", priceCents: 4950, features: { offertes: true, api: true } }
-  });
+  console.log("✅ Seed klaar");
 }
 
-main().finally(() => prisma.$disconnect());
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+}).finally(async () => {
+  await prisma.$disconnect();
+});
