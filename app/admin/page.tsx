@@ -14,7 +14,9 @@ declare global {
 }
 
 const prisma = globalThis.__prisma ?? new PrismaClient();
-if (!globalThis.__prisma) globalThis.__prisma = prisma;
+if (!globalThis.__prisma) {
+  globalThis.__prisma = prisma;
+}
 
 function StatRow({
   label,
@@ -27,7 +29,10 @@ function StatRow({
 }) {
   return (
     <div className="flex items-center justify-between py-1.5">
-      <Link href={href} className="text-emerald-700 underline underline-offset-2">
+      <Link
+        href={href}
+        className="text-emerald-700 underline underline-offset-2"
+      >
         {label}
       </Link>
       <span className="tabular-nums text-emerald-700">{value}</span>
@@ -40,10 +45,13 @@ export default async function AdminDashboardPage() {
   const token = cookieStore.get("session")?.value || "";
   const JWT_SECRET = process.env.JWT_SECRET || "";
 
+  // ===== Check of gebruiker admin is =====
   let isAdmin = false;
   try {
     if (JWT_SECRET && token) {
-      const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & { role?: string };
+      const payload = jwt.verify(token, JWT_SECRET) as JwtPayload & {
+        role?: string;
+      };
       isAdmin = payload?.role === "admin";
     }
   } catch {
@@ -62,10 +70,23 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  // ===== Live data: nieuwe aanmeldingen (Applications met status PENDING)
-  const pendingCount = await prisma.application.count({
-    where: { status: "PENDING" },
-  });
+  // ===== Live data: nieuwe aanmeldingen =====
+  // Hier vangen we ALLE databasefouten af zodat /admin nooit crasht.
+  let pendingCount = 0;
+
+  try {
+    if (process.env.DATABASE_URL) {
+      pendingCount = await prisma.application.count({
+        where: { status: "PENDING" },
+      });
+    }
+  } catch (err) {
+    console.error(
+      "[admin/dashboard] Kon database niet bereiken, pendingCount -> 0",
+      err
+    );
+    pendingCount = 0;
+  }
 
   // ---- Demo-data (vervang later door echte API/DB) ----
   const kpis = {
@@ -84,14 +105,21 @@ export default async function AdminDashboardPage() {
   };
 
   const aandachtNodigTotal =
-    pendingCount + todo.openTickets + todo.bankTransacties + todo.inkoopFacturen;
+    pendingCount +
+    todo.openTickets +
+    todo.bankTransacties +
+    todo.inkoopFacturen;
 
   return (
     <main className="max-w-[1200px] mx-auto px-4 md:px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">Beheerder dashboard</h1>
-      <p className="mt-1 text-zinc-700">Overzicht van taken, omzet en tickets.</p>
+      <h1 className="text-3xl font-semibold tracking-tight">
+        Beheerder dashboard
+      </h1>
+      <p className="mt-1 text-zinc-700">
+        Overzicht van taken, omzet en tickets.
+      </p>
 
-      {/* 3 kolommen zoals in je voorbeeld */}
+      {/* 3 kolommen zoals in je ontwerp */}
       <section className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* To do */}
         <div className="rounded-md border bg-white">
@@ -99,7 +127,9 @@ export default async function AdminDashboardPage() {
             <h2 className="text-xl font-medium">To do</h2>
           </div>
           <div className="px-4 py-4">
-            <div className="text-sm font-medium text-zinc-700">Aandacht nodig</div>
+            <div className="text-sm font-medium text-zinc-700">
+              Aandacht nodig
+            </div>
             <div className="text-3xl mt-1">{aandachtNodigTotal}</div>
 
             <div className="mt-4 text-sm">
@@ -108,7 +138,7 @@ export default async function AdminDashboardPage() {
                 <span className="text-zinc-500">Details</span>
               </div>
 
-              {/* ➕ Nieuwe rij met live teller */}
+              {/* Nieuwe aanmeldingen (met fallback) */}
               <StatRow
                 label="Nieuwe aanmeldingen"
                 value={pendingCount}
@@ -134,7 +164,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Omzet (midden) */}
+        {/* Omzet */}
         <div className="rounded-md border bg-white">
           <div className="border-b px-4 py-3">
             <h2 className="text-xl font-medium">Omzet</h2>
@@ -148,26 +178,33 @@ export default async function AdminDashboardPage() {
               </div>
               <div className="rounded-md bg-zinc-50 p-3">
                 <div className="text-zinc-500">2023 • t/m periode 12</div>
-                <div className="text-xl font-semibold">{kpis.omzet_2023}</div>
+                <div className="text-xl font-semibold">
+                  {kpis.omzet_2023}
+                </div>
               </div>
             </div>
 
-            {/* Plaatsvervanger voor grafiek */}
             <div className="h-48 rounded-md border border-dashed grid place-items-center text-sm text-zinc-500">
               Grafiek omzet (mock)
             </div>
           </div>
         </div>
 
-        {/* Overzicht openstaande tickets (vervangt 'Waarschuwing') */}
+        {/* Overzicht tickets */}
         <div className="rounded-md border bg-white">
           <div className="border-b px-4 py-3">
-            <h2 className="text-xl font-medium">Overzicht openstaande tickets</h2>
+            <h2 className="text-xl font-medium">
+              Overzicht openstaande tickets
+            </h2>
           </div>
           <div className="px-4 py-4">
-            <div className="text-sm font-medium text-zinc-700">Aandacht nodig</div>
+            <div className="text-sm font-medium text-zinc-700">
+              Aandacht nodig
+            </div>
             <div className="text-3xl mt-1">
-              {tickets.achterstallig + tickets.gedeeltelijk + tickets.teLaat}
+              {tickets.achterstallig +
+                tickets.gedeeltelijk +
+                tickets.teLaat}
             </div>
 
             <div className="mt-4 text-sm">
