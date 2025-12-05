@@ -8,22 +8,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ====== ADMIN GEBRUIKER (jijzelf, met 2FA) ======
+
 model User {
   id             String   @id @default(cuid())
   username       String   @unique
   passwordHash   String
   role           String   @default("user")
   totpEnabled    Boolean  @default(true)
-  totpSecret     String?  // Base32 secret voor Microsoft Authenticator
+  totpSecret     String?          // Base32 secret voor Microsoft Authenticator
   recoveryHashes String[] @default([]) // gehashte herstelcodes (optioneel)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+// ====== AANVRAAG / ONBOARDING ======
+
 model Application {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   status       ApplicationStatus @default(PENDING) // PENDING | SENT_FOR_SIGNATURE | SIGNED | REJECTED
+
   // aangevraagde gegevens
   companyName  String
   contactName  String
@@ -53,11 +59,21 @@ enum PlanCode {
   PRO
 }
 
+// ====== KLANT / OMGEVING (TENANT) ======
+
+enum PortalRole {
+  SUPER_USER
+  ADMIN_MEDEWERKER
+  CONTROLLER
+  ACCOUNTANT
+}
+
 model Customer {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  number       String   @unique
+
+  number       String   @unique        // omgeving-/klantnummer
   companyName  String
   contactName  String
   address      String
@@ -67,24 +83,50 @@ model Customer {
   kvk          String
   btw          String
   plan         PlanCode
+
   // relaties
   contracts    Contract[]
   invoices     Invoice[]
+
+  // gebruikers die in deze klantomgeving kunnen inloggen
+  portalUsers  PortalUser[]
 }
 
+// Gebruiker die inlogt in de KLANT-omgeving (niet jouw Admin-login)
+model PortalUser {
+  id          String      @id @default(cuid())
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+
+  email       String      @unique       // 👈 deze regel aanpassen!
+  passwordHash String
+
+  role        PortalRole  @default(ADMIN_MEDEWERKER)
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([customerId, email])
+}
+
+// ====== CONTRACTEN / FACTUREN ======
+
 model Contract {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  status       ContractStatus @default(DRAFT) // DRAFT | SENT | SIGNED
-  applicationId String?  @unique
-  application   Application? @relation(fields: [applicationId], references: [id])
-  customerId   String?
-  customer     Customer? @relation(fields: [customerId], references: [id])
-  version      Int       @default(1)
-  html         String    // bewerkbare HTML (concept)
-  pdfUrl       String?   // (na ondertekening, opslaglink, bv. Supabase Storage)
-  signExternalId String? // id bij e-sign provider
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  status         ContractStatus @default(DRAFT) // DRAFT | SENT | SIGNED
+
+  applicationId  String?  @unique
+  application    Application? @relation(fields: [applicationId], references: [id])
+
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id])
+
+  version        Int       @default(1)
+  html           String    // bewerkbare HTML (concept)
+  pdfUrl         String?   // (na ondertekening, opslaglink, bv. Supabase Storage)
+  signExternalId String?   // id bij e-sign provider
 }
 
 enum ContractStatus {
@@ -97,9 +139,13 @@ model Invoice {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   number      String   @unique
+
+  // heel belangrijk: elke factuur hoort bij één Customer (tenant)
   customerId  String
   customer    Customer @relation(fields: [customerId], references: [id])
+
   amountCents Int
   status      String   // SENT | PAID | OVERDUE ...
 }

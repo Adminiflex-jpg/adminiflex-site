@@ -73,7 +73,7 @@ export default async function RootLayout({
               {!loggedIn ? (
                 <>
                   <Link
-                    href="/login"
+                    href="/portal/login"
                     className="px-4 py-2 rounded-md border text-sm"
                     style={{ borderColor: oldGreen, color: oldGreen }}
                   >
