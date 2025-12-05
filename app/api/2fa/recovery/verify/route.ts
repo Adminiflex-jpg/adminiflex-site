@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { signSession } from "@/lib/auth";
+import { signSession, type SessionRole } from "@/lib/auth";
 // import { prisma } from "@/lib/prisma";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
@@ -39,9 +39,10 @@ export async function POST(req: Request) {
     return NextResponse.redirect(new URL("/2fa/recovery?error=Ongeldige%20herstelcode", req.url));
   }
 
-  // Optioneel: markeer gebruikte code als verbruikt in DB.
+  // Ensure role is a valid SessionRole
+  const role = (user.role === "admin" ? "admin" : user.role) as SessionRole;
+  const session = signSession({ uid: user.id, role });
 
-  const session = signSession({ uid: user.id, role: user.role });
   const res = NextResponse.redirect(new URL("/admin", req.url));
   res.headers.append(
     "Set-Cookie",
