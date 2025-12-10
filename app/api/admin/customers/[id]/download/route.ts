@@ -1,51 +1,59 @@
-// app/api/admin/contracts/[id]/download/route.ts
-import { NextResponse } from "next/server";
+// app/api/admin/customers/[id]/download/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Zorg dat we op de Node-runtime draaien (niet edge)
+export const runtime = "nodejs";
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  // ⬅️ Belangrijk: params is nu een Promise, dus eerst await
+  const { id } = await context.params;
 
   if (!id) {
-    return new NextResponse("ContractId ontbreekt", { status: 400 });
+    return NextResponse.json(
+      { error: "Contract-id ontbreekt in de URL." },
+      { status: 400 }
+    );
   }
 
-  const contract = await prisma.contract.findUnique({
-    where: { id },
-    include: { customer: true },
-  });
+  try {
+    const contract = await prisma.contract.findUnique({
+      where: { id },
+      include: { customer: true },
+    });
 
-  if (!contract) {
-    return new NextResponse("Contract niet gevonden", { status: 404 });
+    if (!contract) {
+      return NextResponse.json(
+        { error: "Contract niet gevonden." },
+        { status: 404 }
+      );
+    }
+
+    const companyName = contract.customer?.companyName ?? "contract";
+    const safeName = companyName.replace(/[^\w\-]+/g, "_");
+
+    const html =
+      contract.html ||
+      "<html><body><p>Geen contracttekst opgeslagen.</p></body></html>";
+
+    // Download als HTML-bestand
+    return new NextResponse(html, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${safeName}.html"`,
+      },
+    });
+  } catch (error) {
+    console.error("Fout bij contract-download:", error);
+    return NextResponse.json(
+      { error: "Er ging iets mis bij het genereren van de download." },
+      { status: 500 }
+    );
   }
-
-  const customerNumber = contract.customer?.number ?? "onbekend";
-
-  // We maken een simpele HTML-pagina die Word prima kan openen
-  const innerHtml = contract.html ?? "";
-  const docHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Contract ${customerNumber}</title>
-</head>
-<body>
-${innerHtml}
-</body>
-</html>`;
-
-  const fileName = `contract-${customerNumber}.doc`;
-
-  return new NextResponse(docHtml, {
-    status: 200,
-    headers: {
-      // ✅ Word herkent dit prima
-      "Content-Type": "application/msword; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
-    },
-  });
 }
