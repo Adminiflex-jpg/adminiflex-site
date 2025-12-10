@@ -68,30 +68,6 @@ enum PortalRole {
   ACCOUNTANT
 }
 
-model Customer {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  number       String   @unique        // omgeving-/klantnummer
-  companyName  String
-  contactName  String
-  address      String
-  postalCode   String
-  city         String
-  email        String
-  kvk          String
-  btw          String
-  plan         PlanCode
-
-  // relaties
-  contracts    Contract[]
-  invoices     Invoice[]
-
-  // gebruikers die in deze klantomgeving kunnen inloggen
-  portalUsers  PortalUser[]
-}
-
 // Gebruiker die inlogt in de KLANT-omgeving (niet jouw Admin-login)
 model PortalUser {
   id          String      @id @default(cuid())
@@ -148,4 +124,31 @@ model Invoice {
 
   amountCents Int
   status      String   // SENT | PAID | OVERDUE ...
+}
+model Customer {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  number        String    @unique
+  companyName   String
+  contactName   String
+  address       String
+  postalCode    String
+  city          String
+  email         String
+  kvk           String
+  btw           String
+  plan          PlanCode
+
+  // ✅ klantstatus
+  isActive      Boolean   @default(false)
+
+  // Nieuw voor demo-omgevingen
+  demoActive    Boolean   @default(false)
+  demoExpiresAt DateTime?
+
+  // relaties
+  contracts     Contract[]
+  invoices      Invoice[]
+  portalUsers   PortalUser[]
 }

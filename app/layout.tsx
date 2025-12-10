@@ -3,8 +3,12 @@ import "./globals.css";
 import React from "react";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import Link from "next/link";
 import HeaderSwitcher from "./components/HeaderSwitcher";
+import {
+  BRAND_GREEN,
+  BRAND_GREEN_DEEP,
+  BRAND_MINT,
+} from "../lib/theme";
 
 export const metadata = {
   title: "AdminiFlex",
@@ -16,12 +20,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const oldGreen = "#2F6B4F";
-  const deepGreen = "#1E4C37";
-  const lightMint = "#E8F2ED";
-
   // Loginstatus bepalen via JWT-cookie
-  const token = (await cookies()).get("session")?.value || "";
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value || "";
   const JWT_SECRET = process.env.JWT_SECRET || "";
   let loggedIn = false;
 
@@ -36,55 +37,59 @@ export default async function RootLayout({
     loggedIn = false;
   }
 
-  // 👉 Logo-link: als ingelogd → /admin, anders → /
-  const logoHref = loggedIn ? "/admin" : "/";
-
   return (
     <html lang="nl">
       <body
         className="min-h-screen text-zinc-900 flex flex-col"
         style={{
-          background: `linear-gradient(180deg, ${lightMint} 0%, #ffffff 100%)`,
+          background: `linear-gradient(180deg, ${BRAND_MINT} 0%, #ffffff 100%)`,
         }}
       >
         {/* HEADER */}
         <header className="sticky top-0 z-40 bg-white border-b md:bg-white/80 md:backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-            {/* Logo + titel */}
-            <Link href={logoHref} className="flex items-center gap-3">
-              <div
-                className="w-9 h-9 rounded-xl grid place-items-center text-white font-semibold"
-                style={{
-                  background: `linear-gradient(135deg, ${oldGreen}, ${deepGreen})`,
-                }}
-              >
-                <span className="text-[11px] leading-none select-none">AF</span>
-              </div>
-              <span className="font-semibold tracking-tight text-lg">
-                AdminiFlex
-              </span>
-            </Link>
+            {/* Logo */}
+<a
+  href={loggedIn ? "/admin" : "/"}
+  className="flex items-center gap-3"
+>
+  <div
+    className="w-9 h-9 rounded-xl grid place-items-center text-white font-semibold"
+    style={{
+      background: "linear-gradient(135deg, #2F6B4F, #1E4C37)", // of je theme-constants
+    }}
+  >
+    <span className="text-[11px] leading-none select-none">AF</span>
+  </div>
+  <span className="font-semibold tracking-tight text-lg">
+    AdminiFlex
+  </span>
+</a>
 
-            {/* Menu-schakelaar: publiek menu vs admin menu */}
-            <HeaderSwitcher loggedIn={loggedIn} oldGreen={oldGreen} />
 
-            {/* Rechts: in-/uitloggen + kennisbank */}
+            {/* Menu-schakelaar (admin / publiek) */}
+            <HeaderSwitcher loggedIn={loggedIn} oldGreen={BRAND_GREEN} />
+
+            {/* Rechts: in-/uitloggen + proef / kennisbank */}
             <div className="flex items-center gap-2">
               {!loggedIn ? (
                 <>
-                  <Link
-                    href="/portal/login"
+                  <a
+                    href="/login"
                     className="px-4 py-2 rounded-md border text-sm"
-                    style={{ borderColor: oldGreen, color: oldGreen }}
+                    style={{
+                      borderColor: BRAND_GREEN,
+                      color: BRAND_GREEN,
+                    }}
                   >
                     Inloggen
-                  </Link>
+                  </a>
                   <a
-                    href="#cta"
+                    href="/aanmelden"
                     className="px-4 py-2 rounded-md text-sm text-white"
-                    style={{ backgroundColor: oldGreen }}
+                    style={{ backgroundColor: BRAND_GREEN }}
                   >
-                    Vraag demo aan
+                    Start gratis proefperiode
                   </a>
                 </>
               ) : (
@@ -93,18 +98,21 @@ export default async function RootLayout({
                     <button
                       type="submit"
                       className="px-4 py-2 rounded-md text-sm text-white"
-                      style={{ backgroundColor: oldGreen }}
+                      style={{ backgroundColor: BRAND_GREEN }}
                     >
                       Uitloggen
                     </button>
                   </form>
-                  <Link
+                  <a
                     href="/kennisbank"
                     className="px-4 py-2 rounded-md border text-sm"
-                    style={{ borderColor: oldGreen, color: oldGreen }}
+                    style={{
+                      borderColor: BRAND_GREEN,
+                      color: BRAND_GREEN,
+                    }}
                   >
                     Kennisbank
-                  </Link>
+                  </a>
                 </>
               )}
             </div>
@@ -115,13 +123,13 @@ export default async function RootLayout({
         <main className="flex-grow">{children}</main>
 
         {/* FOOTER */}
-        <footer className="border-t bg-white/70 backdrop-blur">
+        <footer className="border-t bg-white/70 backdrop-blur mt-10">
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 text-sm text-zinc-600 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-lg grid place-items-center text-white text-[10px] font-semibold"
                 style={{
-                  background: `linear-gradient(135deg, ${oldGreen}, ${deepGreen})`,
+                  background: `linear-gradient(135deg, ${BRAND_GREEN}, ${BRAND_GREEN_DEEP})`,
                 }}
               >
                 AF
@@ -129,10 +137,10 @@ export default async function RootLayout({
               <span className="font-medium">AdminiFlex</span>
             </div>
             <div className="flex gap-4">
-              <Link href="/privacy">Privacy</Link>
-              <Link href="/voorwaarden">Voorwaarden</Link>
-              <Link href="/status">Status</Link>
-              <Link href="/contact">Contact</Link>
+              <a href="/privacy">Privacy</a>
+              <a href="/voorwaarden">Voorwaarden</a>
+              <a href="/status">Status</a>
+              <a href="/contact">Contact</a>
             </div>
             <div>
               © {new Date().getFullYear()} AdminiFlex. Alle rechten

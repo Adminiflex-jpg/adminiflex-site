@@ -6,15 +6,33 @@ export default function PortalLoginPage({
 }: {
   searchParams?: { error?: string };
 }) {
-  const error = searchParams?.error;
+  const rawError = searchParams?.error;
+
+  // 1) Technische error uit de URL halen en leesbaar maken
+  const errorKey = rawError ? decodeURIComponent(rawError) : null;
+
+  // 2) Technische "keys" vertalen naar vriendelijke teksten
+  let friendlyError: string | null = null;
+
+  if (errorKey === "Onjuiste inloggegevens") {
+    friendlyError = "Deze combinatie van e-mailadres en wachtwoord is niet bij ons bekend.";
+  } else if (errorKey === "Vul e-mail en wachtwoord in") {
+    friendlyError = "Vul alsjeblieft zowel je e-mailadres als je wachtwoord in.";
+  } else if (errorKey === "Sessie verlopen") {
+    friendlyError = "Je sessie is verlopen. Log opnieuw in om verder te gaan.";
+  } else if (errorKey) {
+    // Alles wat we niet herkennen gewoon tonen
+    friendlyError = errorKey;
+  }
 
   return (
     <main className="max-w-md mx-auto px-4 py-16">
       <h1 className="text-2xl font-semibold mb-4">Klantomgeving inloggen</h1>
 
-      {error && (
+      {/* 3) Alleen tonen als er echt een fout is */}
+      {friendlyError && (
         <p className="text-red-600 mb-4">
-          {decodeURIComponent(error)}
+          {friendlyError}
         </p>
       )}
 

@@ -1,4 +1,4 @@
-// app/admin/klanten/[id]/layout.tsx
+// app/admin/klanten/[customerNumber]/layout.tsx
 import Link from "next/link";
 
 export default function CustomerLayout({

@@ -1,4 +1,4 @@
-// app/admin/klanten/[id]/page.tsx
+// app/admin/klanten/[customerNumber]/page.tsx
 import Link from "next/link";
 
 export default async function CustomerPage({

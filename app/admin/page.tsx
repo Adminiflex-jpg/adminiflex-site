@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import Link from "next/link";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ContractStatus } from "@prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +18,9 @@ if (!globalThis.__prisma) {
   globalThis.__prisma = prisma;
 }
 
+// kleur voor koppen en links
+const oldGreen = "#2F6B4F";
+
 function StatRow({
   label,
   value,
@@ -31,11 +34,14 @@ function StatRow({
     <div className="flex items-center justify-between py-1.5">
       <Link
         href={href}
-        className="text-emerald-700 underline underline-offset-2"
+        className="underline underline-offset-2"
+        style={{ color: oldGreen }}
       >
         {label}
       </Link>
-      <span className="tabular-nums text-emerald-700">{value}</span>
+      <span className="tabular-nums" style={{ color: oldGreen }}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -61,7 +67,9 @@ export default async function AdminDashboardPage() {
   if (!isAdmin) {
     return (
       <main className="max-w-3xl mx-auto px-4 md:px-6 py-16">
-        <h1 className="text-2xl font-semibold">Niet ingelogd</h1>
+        <h1 className="text-2xl font-semibold" style={{ color: oldGreen }}>
+          Niet ingelogd
+        </h1>
         <p className="mt-2">Je hebt geen toegang tot deze pagina.</p>
         <Link href="/login" className="mt-4 inline-block underline">
           Ga naar inloggen
@@ -70,49 +78,96 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  // ===== Live data: nieuwe aanmeldingen =====
-  // Hier vangen we ALLE databasefouten af zodat /admin nooit crasht.
-  let pendingCount = 0;
+  // ===== Nieuwe aanmeldingen: openstaande contracten =====
+  // (alles wat nog NIET op SIGNED staat)
+  let openContractsCount = 0;
+  let openContracts: {
+    id: string;
+    companyName: string;
+    number: string;
+    status: ContractStatus;
+    createdAt: Date;
+  }[] = [];
 
   try {
     if (process.env.DATABASE_URL) {
-      pendingCount = await prisma.application.count({
+      const rawContracts = await prisma.contract.findMany({
+        where: { status: { not: ContractStatus.SIGNED } },
+        orderBy: { createdAt: "desc" },
+        include: { customer: true },
+        take: 5, // laat de laatste 5 zien in de lijst
+      });
+
+      openContractsCount = await prisma.contract.count({
+        where: { status: { not: ContractStatus.SIGNED } },
+      });
+
+      openContracts = rawContracts
+        .filter((c) => c.customer)
+        .map((c) => ({
+          id: c.id,
+          companyName: c.customer!.companyName,
+          number: c.customer!.number,
+          status: c.status,
+          createdAt: c.createdAt,
+        }));
+    }
+  } catch (err) {
+    console.error(
+      "[admin/dashboard] Kon database niet bereiken, openContractsCount -> 0",
+      err
+    );
+    openContractsCount = 0;
+    openContracts = [];
+  }
+
+  // ===== Openstaande tickets: proef-aanmeldingen (Application PENDING) =====
+  let openTicketCount = 0;
+
+  try {
+    if (process.env.DATABASE_URL) {
+      openTicketCount = await prisma.application.count({
         where: { status: "PENDING" },
       });
     }
   } catch (err) {
     console.error(
-      "[admin/dashboard] Kon database niet bereiken, pendingCount -> 0",
+      "[admin/dashboard] Kon applications niet ophalen, openTicketCount -> 0",
       err
     );
-    pendingCount = 0;
+    openTicketCount = 0;
   }
 
-  // ---- Demo-data (vervang later door echte API/DB) ----
+  // ---- Demo-data + koppeling met openTicketCount ----
   const kpis = {
     omzet: "€ 78.340,99",
     omzet_2023: "€ 537.576,00",
   };
+
   const todo = {
-    openTickets: 5,
+    openTickets: openTicketCount, // ✅ nu echt openstaande proef-aanmeldingen
     bankTransacties: 11,
     inkoopFacturen: 4,
   };
+
   const tickets = {
-    achterstallig: 14,
-    gedeeltelijk: 2,
-    teLaat: 1,
+    achterstallig: openTicketCount, // zelfde set, eventueel later specificeren
+    gedeeltelijk: 0,
+    teLaat: 0,
   };
 
   const aandachtNodigTotal =
-    pendingCount +
+    openContractsCount +
     todo.openTickets +
     todo.bankTransacties +
     todo.inkoopFacturen;
 
   return (
     <main className="max-w-[1200px] mx-auto px-4 md:px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">
+      <h1
+        className="text-3xl font-semibold tracking-tight"
+        style={{ color: oldGreen }}
+      >
         Beheerder dashboard
       </h1>
       <p className="mt-1 text-zinc-700">
@@ -124,7 +179,12 @@ export default async function AdminDashboardPage() {
         {/* To do */}
         <div className="rounded-md border bg-white">
           <div className="border-b px-4 py-3">
-            <h2 className="text-xl font-medium">To do</h2>
+            <h2
+              className="text-xl font-medium"
+              style={{ color: oldGreen }}
+            >
+              To do
+            </h2>
           </div>
           <div className="px-4 py-4">
             <div className="text-sm font-medium text-zinc-700">
@@ -138,13 +198,14 @@ export default async function AdminDashboardPage() {
                 <span className="text-zinc-500">Details</span>
               </div>
 
-              {/* Nieuwe aanmeldingen (met fallback) */}
+              {/* Nieuwe aanmeldingen → alle openstaande contracten */}
               <StatRow
                 label="Nieuwe aanmeldingen"
-                value={pendingCount}
-                href="/admin/klanten/aanmaken"
+                value={openContractsCount}
+                href="/admin/klanten/contracten"
               />
 
+              {/* Openstaande tickets → proef-aanmeldingen (Application PENDING) */}
               <StatRow
                 label="Openstaande tickets"
                 value={todo.openTickets}
@@ -161,13 +222,57 @@ export default async function AdminDashboardPage() {
                 href="/admin/financieel/crediteuren"
               />
             </div>
+
+            {/* Extra: lijstje met laatste nieuwe aanmeldingen (contracten) */}
+            <div className="mt-4 border-t pt-3 text-xs text-zinc-600">
+              <div className="mb-1 font-medium">
+                Laatste nieuwe aanmeldingen
+              </div>
+              {openContracts.length === 0 && (
+                <p className="text-zinc-500">
+                  Er zijn op dit moment geen openstaande nieuwe aanmeldingen.
+                </p>
+              )}
+              <ul className="space-y-1">
+                {openContracts.map((c) => (
+                  <li
+                    key={c.id}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <div>
+                      <Link
+                        href={`/admin/klanten/${c.number}/contract`}
+                        className="underline"
+                        style={{ color: oldGreen }}
+                      >
+                        {c.companyName}
+                      </Link>
+                      <span className="ml-2 text-[11px] text-zinc-500">
+                        {c.number} ·{" "}
+                        {c.createdAt.toISOString().slice(0, 10)}
+                      </span>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border text-zinc-600">
+                      {c.status === ContractStatus.DRAFT
+                        ? "Concept"
+                        : "Verzonden"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
         {/* Omzet */}
         <div className="rounded-md border bg-white">
           <div className="border-b px-4 py-3">
-            <h2 className="text-xl font-medium">Omzet</h2>
+            <h2
+              className="text-xl font-medium"
+              style={{ color: oldGreen }}
+            >
+              Omzet
+            </h2>
           </div>
 
           <div className="px-4 py-4 space-y-3">
@@ -193,7 +298,10 @@ export default async function AdminDashboardPage() {
         {/* Overzicht tickets */}
         <div className="rounded-md border bg-white">
           <div className="border-b px-4 py-3">
-            <h2 className="text-xl font-medium">
+            <h2
+              className="text-xl font-medium"
+              style={{ color: oldGreen }}
+            >
               Overzicht openstaande tickets
             </h2>
           </div>

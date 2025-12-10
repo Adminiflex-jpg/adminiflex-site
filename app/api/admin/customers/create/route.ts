@@ -1,63 +1,341 @@
 // app/api/admin/customers/create/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import {
+  Prisma,
+  PrismaClient,
+  PlanCode,
+  ContractStatus,
+} from "@prisma/client";
+import bcrypt from "bcryptjs";
+
 const prisma = new PrismaClient();
 
-// Dummy e-sign: koppel later met DocuSign/Dropbox Sign; nu alleen status bijwerken.
-async function sendToESign(email: string, html: string) {
-  // TODO: maak hier PDF en verstuur via provider. Return fake id.
-  return { externalId: "demo-esign-123" };
+/**
+ * Label voor weergave van het pakket
+ */
+function labelForPlan(plan: PlanCode) {
+  switch (plan) {
+    case "PLUS":
+      return "PLUS";
+    case "PRO":
+      return "PRO";
+    default:
+      return "BASIC";
+  }
 }
 
+/**
+ * HTML van het contract met jouw volledige tekst,
+ * maar mét dynamische gegevens (klant, pakket, KVK/BTW, datum).
+ */
+function buildContractHtml(opts: {
+  companyName: string;
+  contactName: string;
+  kvk: string;
+  btw: string;
+  plan: PlanCode;
+  customerNumber: string;
+}) {
+  const { companyName, contactName, kvk, btw, plan, customerNumber } = opts;
+
+  const planLabel = labelForPlan(plan);
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+  return `
+    <h2>Overeenkomst Software-as-a-Service (SaaS) – AdminiFlex B.V.</h2>
+    <p><strong>Versie:</strong> 2025-11-10<br/>
+    <strong>Datum van ondertekening:</strong> ${today}</p>
+
+    <h3>Artikel 1 – Partijen</h3>
+    <p>
+      <strong>Leverancier:</strong> AdminiFlex B.V. gevestigd te [adres invullen],
+      ingeschreven bij de Kamer van Koophandel onder nummer [KvK invullen],
+      BTW-nummer [BTW invullen], rechtsgeldig vertegenwoordigd door [naam invullen],
+      in de hoedanigheid van oprichter/directeur, hierna: <em>Leverancier</em>.
+    </p>
+    <p>
+      <strong>Klant:</strong> ${companyName} (KVK: ${kvk}, BTW: ${btw}),
+      t.a.v. ${contactName}, hierna: <em>Klant</em>.
+      <br/>Klantnummer: <strong>${customerNumber}</strong>.
+    </p>
+
+    <h3>Artikel 2 – Doel en aard van de dienst</h3>
+    <p>
+      Leverancier biedt via www.adminiflex.nl een online softwareapplicatie aan
+      onder de naam AdminiFlex (de <em>Dienst</em>).
+    </p>
+    <p>
+      De Dienst richt zich op ondernemingen, verenigingen en zelfstandigen
+      (zzp, mkb en grotere organisaties) voor digitale boekhouding,
+      ledenadministratie, offertes/contracten en rapportages.
+    </p>
+    <p>
+      De Dienst stelt Klant in staat administratieve en boekhoudkundige taken te
+      automatiseren, rapportages te genereren en financiële transacties te
+      registreren. Leverancier levert uitsluitend technische ondersteuning
+      omtrent de werking van de software; er wordt geen fiscaal, juridisch
+      of boekhoudkundig advies verstrekt.
+    </p>
+
+    <h3>Artikel 3 – Duur, verlenging en opzegging</h3>
+    <p>
+      De Overeenkomst wordt aangegaan voor onbepaalde tijd, tenzij schriftelijk
+      anders overeengekomen.
+    </p>
+    <p>
+      Klant kiest bij aanvang voor een maand- of jaarabonnement (gekozen pakket:
+      <strong>${planLabel}</strong>).
+    </p>
+    <p>
+      Bij maandabonnementen geldt een opzegtermijn van één (1) maand.
+      Bij jaarabonnementen geldt een opzegtermijn van drie (3) maanden vóór
+      het einde van de contractperiode.
+    </p>
+    <p>
+      Jaarcontracten worden automatisch verlengd met telkens twaalf (12) maanden,
+      tenzij tijdig opgezegd.
+    </p>
+    <p>
+      Nieuwe klanten ontvangen een proefperiode van dertig (30) dagen waarin
+      de Dienst kosteloos gebruikt mag worden.
+    </p>
+
+    <h3>Artikel 4 – Prijzen en betaling</h3>
+    <p>
+      Tarieven (excl. btw): Basic € 12,50 p/m; Plus € 24,50 p/m; Pro € 49,50 p/m.
+    </p>
+    <p>
+      Facturatie vindt maandelijks achteraf plaats, tenzij anders overeengekomen.
+      Betalingstermijn: 14 dagen na factuurdatum.
+    </p>
+    <p>
+      Leverancier kan tarieven jaarlijks indexeren of aanpassen met een
+      aankondigingstermijn van minimaal 30 dagen.
+    </p>
+
+    <h3>Artikel 5 – Hosting en beschikbaarheid</h3>
+    <p>
+      De Dienst wordt gehost via Netlify (en gekoppelde diensten) met databeheer
+      en beveiliging conform Europese wetgeving.
+    </p>
+    <p>
+      Leverancier streeft naar hoge beschikbaarheid, maar kan geen absolute
+      uptime garanderen. Onderhoud vindt bij voorkeur buiten kantooruren plaats;
+      storingen worden zo spoedig mogelijk verholpen.
+    </p>
+
+    <h3>Artikel 6 – Privacy en gegevensbescherming</h3>
+    <p>
+      Partijen erkennen dat persoonsgegevens worden verwerkt bij gebruik van de
+      Dienst. Leverancier handelt conform de AVG. Bij invoer van
+      persoonsgegevens door Klant geldt Klant als verwerkingsverantwoordelijke
+      en Leverancier als verwerker.
+    </p>
+    <p>
+      Op verzoek sluiten partijen een verwerkersovereenkomst (DPA) waarin
+      verwerking en beveiliging nader zijn geregeld. Data wordt veilig
+      opgeslagen in een online database. Passende technische en organisatorische
+      maatregelen zijn van toepassing.
+    </p>
+
+    <h3>Artikel 7 – Intellectuele eigendom</h3>
+    <p>
+      Alle IE-rechten op software, broncode, ontwerpen en documentatie berusten
+      volledig bij Leverancier. Klant krijgt een niet-exclusief,
+      niet-overdraagbaar en herroepbaar gebruiksrecht voor de duur van de
+      Overeenkomst.
+    </p>
+    <p>
+      Het is Klant verboden de software te kopiëren, wijzigen, sublicentiëren,
+      verhuren of reverse-engineeren zonder voorafgaande schriftelijke
+      toestemming.
+    </p>
+
+    <h3>Artikel 8 – Aansprakelijkheid</h3>
+    <p>
+      Leverancier is niet aansprakelijk voor indirecte schade, gevolgschade,
+      winstderving of verlies van gegevens.
+    </p>
+    <p>
+      De totale aansprakelijkheid is beperkt tot het bedrag dat Klant in de
+      laatste drie (3) maanden aan abonnementskosten heeft voldaan, met een
+      maximum van € 10.000.
+    </p>
+    <p>
+      Leverancier is niet verantwoordelijk voor fouten die voortvloeien uit
+      onjuiste of onvolledige gegevensinvoer door Klant.
+    </p>
+
+    <h3>Artikel 9 – Beëindiging</h3>
+    <p>
+      Beide partijen kunnen de Overeenkomst beëindigen met inachtneming van de
+      toepasselijke opzegtermijn zoals beschreven bij het gekozen abonnement.
+    </p>
+    <p>
+      Na beëindiging blijft de Dienst 30 dagen beschikbaar om data te exporteren.
+      Daarna worden gegevens verwijderd, tenzij wettelijke bewaarplicht anders
+      voorschrijft.
+    </p>
+
+    <h3>Artikel 10 – Toepasselijk recht en bevoegde rechter</h3>
+    <p>
+      Op deze Overeenkomst is Nederlands recht van toepassing.
+      Geschillen worden voorgelegd aan de bevoegde rechter te Amsterdam.
+    </p>
+
+    <h3>Artikel 11 – Slotbepalingen</h3>
+    <p>
+      Indien een bepaling nietig of onafdwingbaar blijkt, blijven overige
+      bepalingen onverkort van kracht. Wijzigingen zijn slechts geldig indien
+      schriftelijk overeengekomen.
+    </p>
+
+    <h3>Artikel 12 – Ondertekening</h3>
+    <p>
+      Aldus overeengekomen en (digitaal) rechtsgeldig ondertekend door beide
+      partijen.
+    </p>
+
+    <p>
+      <strong>Leverancier</strong><br/>
+      AdminiFlex B.V.<br/>
+      Naam: [naam vertegenwoordiger]<br/>
+      Functie: Oprichter/Directeur<br/>
+      Datum: ${today}
+    </p>
+
+    <p>
+      <strong>Klant</strong><br/>
+      Naam: ${companyName}<br/>
+      Contactpersoon: ${contactName}<br/>
+      Functie: [functie invullen]<br/>
+      Datum: ${today}
+    </p>
+  `;
+}
+
+/**
+ * POST /api/admin/customers/create
+ * Maakt:
+ *  - Customer (met isActive = false + evt. demoActive/demoExpiresAt)
+ *  - PortalUser (login voor klant)
+ *  - Contract (DRAFT) met bovenstaande HTML
+ */
 export async function POST(req: Request) {
-  const form = await req.formData();
-  const action = String(form.get("action") || "save-draft");
+  try {
+    const form = await req.formData();
 
-  const payload = {
-    applicationId: String(form.get("applicationId") || ""),
-    companyName: String(form.get("companyName") || ""),
-    contactName: String(form.get("contactName") || ""),
-    address: String(form.get("address") || ""),
-    postalCode: String(form.get("postalCode") || ""),
-    city: String(form.get("city") || ""),
-    email: String(form.get("email") || ""),
-    kvk: String(form.get("kvk") || ""),
-    btw: String(form.get("btw") || ""),
-    plan: String(form.get("plan") || "BASIC"),
-    contractHtml: String(form.get("contractHtml") || ""),
-  };
+    const companyName = String(form.get("companyName") ?? "").trim();
+    const contactName = String(form.get("contactName") ?? "").trim();
+    const address = String(form.get("address") ?? "").trim();
+    const postalCode = String(form.get("postalCode") ?? "").trim();
+    const city = String(form.get("city") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim().toLowerCase();
+    const kvk = String(form.get("kvk") ?? "").trim();
+    const btw = String(form.get("btw") ?? "").trim();
 
-  // maak of update Contract gekoppeld aan Application
-  const app = payload.applicationId
-    ? await prisma.application.findUnique({ where: { id: payload.applicationId } })
-    : null;
+    const planRaw = String(form.get("plan") ?? "BASIC").toUpperCase();
+    const allowedPlans: PlanCode[] = ["BASIC", "PLUS", "PRO"];
+    const plan: PlanCode = (allowedPlans as string[]).includes(planRaw)
+      ? (planRaw as PlanCode)
+      : "BASIC";
 
-  // bewaar/maak concept contract
-  let contract = await prisma.contract.upsert({
-    where: { applicationId: payload.applicationId || "___none___" },
-    update: { html: payload.contractHtml },
-    create: {
-      html: payload.contractHtml,
-      applicationId: app?.id,
-      status: "DRAFT",
-    },
-  });
+    const portalEmail = String(form.get("portalEmail") ?? "").trim().toLowerCase();
+    const portalPassword = String(form.get("portalPassword") ?? "");
 
-  if (action === "send-sign") {
-    const esign = await sendToESign(payload.email, payload.contractHtml);
-    contract = await prisma.contract.update({
-      where: { id: contract.id },
-      data: { status: "SENT", signExternalId: esign.externalId },
-    });
-    if (app) {
-      await prisma.application.update({
-        where: { id: app.id },
-        data: { status: "SENT_FOR_SIGNATURE" },
-      });
+    // ✅ Nieuw: demo-veld uitlezen uit formulier (checkbox, hidden of radio)
+    const isDemoRaw = String(form.get("isDemo") ?? "").toLowerCase();
+    const isDemo =
+      isDemoRaw === "1" ||
+      isDemoRaw === "true" ||
+      isDemoRaw === "on";
+
+    // 30 dagen demo-periode als isDemo = true
+    const demoExpiresAt = isDemo
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : null;
+
+    if (!companyName || !contactName || !portalEmail || !portalPassword) {
+      return NextResponse.redirect(
+        new URL(
+          "/admin/klanten/contracten?error=Verplichte+velden+ontbreken",
+          req.url,
+        ),
+      );
     }
-    return NextResponse.redirect(new URL(`/admin/klanten/aanmaken?app=${app?.id ?? ""}&sent=1`, req.url));
-  }
 
-  // alleen concept opslaan
-  return NextResponse.redirect(new URL(`/admin/klanten/aanmaken?app=${app?.id ?? ""}&saved=1`, req.url));
+    const passwordHash = await bcrypt.hash(portalPassword, 10);
+
+    // Klantnummer genereren, bijvoorbeeld: CUST-2025XXXXXX
+    const now = new Date();
+    const year = now.getFullYear();
+    const random = Math.floor(100000 + Math.random() * 900000);
+    const customerNumber = `CUST-${year}${random}`;
+
+    // 1) Customer aanmaken
+    const customer = await prisma.customer.create({
+      data: {
+        number: customerNumber,
+        companyName,
+        contactName,
+        address,
+        postalCode,
+        city,
+        email,
+        kvk,
+        btw,
+        plan,
+        // Omgeving nog niet actief totdat contract getekend is
+        isActive: false,
+        // ✅ Nieuw: demo-informatie
+        demoActive: isDemo,
+        demoExpiresAt: demoExpiresAt ?? undefined,
+      } as Prisma.CustomerCreateInput,
+    });
+
+    // 2) PortalUser aanmaken
+    await prisma.portalUser.create({
+      data: {
+        customerId: customer.id,
+        email: portalEmail,
+        passwordHash,
+        role: "SUPER_USER",
+      },
+    });
+
+    // 3) Contract (concept) aanmaken
+    const html = buildContractHtml({
+      companyName,
+      contactName,
+      kvk,
+      btw,
+      plan,
+      customerNumber,
+    });
+
+    await prisma.contract.create({
+      data: {
+        customerId: customer.id,
+        status: ContractStatus.DRAFT,
+        html,
+        version: 1,
+      },
+    });
+
+    // 4) Terug naar contract-overzicht
+    return NextResponse.redirect(
+      new URL(
+        "/admin/klanten/contracten?success=Klantomgeving+en+contract+aangemaakt",
+        req.url,
+      ),
+    );
+  } catch (error) {
+    console.error("Fout bij klant + contract aanmaken:", error);
+    return NextResponse.redirect(
+      new URL(
+        "/admin/klanten/contracten?error=Kon+klantomgeving+niet+aanmaken",
+        req.url,
+      ),
+    );
+  }
 }

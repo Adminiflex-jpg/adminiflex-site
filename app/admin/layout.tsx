@@ -27,7 +27,7 @@ export default async function AdminLayout({
 
   // Niet ingelogd als admin → terug naar login
   if (!isAdmin) {
-    redirect("/login?error=Sessie%20verlopen");
+    redirect("/login"); // geen error-parameter meer
   }
 
   // Wél admin → géén extra HTML/body/header, alleen de inhoud

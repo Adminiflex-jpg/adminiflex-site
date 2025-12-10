@@ -17,9 +17,8 @@ export default function PrivacyPage() {
       </header>
 
       <article className="prose prose-zinc max-w-none">
-        <h2>1. Inleiding</h2>
+        <h2 style={{ color: oldGreen }}>1. Inleiding</h2>
         <p>
-        <br /><br />
           Deze privacyverklaring beschrijft hoe AdminiFlex omgaat met persoonsgegevens van
           klanten en gebruikers van onze SaaS-dienst voor boekhouding, ledenadministratie
           en voorraadbeheer. Wij verwerken gegevens uitsluitend in overeenstemming met de
@@ -30,20 +29,21 @@ export default function PrivacyPage() {
           AdminiFlex richt zich uitsluitend op zakelijke klanten (B2B). Deze verklaring is
           bedoeld voor onze klanten, hun medewerkers en contactpersonen.
         </p>
-        <br /><br />
-        <h2>2. Wie is verantwoordelijk?</h2>
-        <br /><br />
-        <p><strong>AdminiFlex</strong><br />
-          E-mail: <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a><br />
+
+        <h2 style={{ color: oldGreen }}>2. Wie is verantwoordelijk?</h2>
+        <p>
+          <strong>AdminiFlex</strong>
+          <br />
+          E-mail: <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a>
+          <br />
           Website: <a href="https://www.adminiflex.nl" style={{ color: oldGreen }}>www.adminiflex.nl</a>
         </p>
         <p>
           AdminiFlex is verwerkingsverantwoordelijke voor de verwerking van persoonsgegevens
           binnen de eigen dienstverlening.
         </p>
-        <br /><br />
-        <h2>3. Welke persoonsgegevens verwerken wij?</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>3. Welke persoonsgegevens verwerken wij?</h2>
         <p>Afhankelijk van het gebruik van onze diensten kunnen wij de volgende categorieën gegevens verwerken:</p>
         <ul>
           <li><strong>Identificatie- en contactgegevens:</strong> naam, e-mail, telefoonnummer.</li>
@@ -53,9 +53,8 @@ export default function PrivacyPage() {
           <li><strong>Gebruiksgegevens:</strong> technische logbestanden (tijdstip, IP-adres, browser, foutmeldingen).</li>
         </ul>
         <p>Wij verwerken géén bijzondere persoonsgegevens (zoals gezondheidsgegevens of politieke opvattingen).</p>
-        <br /><br />
-        <h2>4. Doeleinden van verwerking</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>4. Doeleinden van verwerking</h2>
         <p>Wij gebruiken persoonsgegevens uitsluitend voor:</p>
         <ul>
           <li>Het aanmaken en beheren van gebruikersaccounts.</li>
@@ -65,26 +64,23 @@ export default function PrivacyPage() {
           <li>Verbetering van onze software en beveiliging.</li>
         </ul>
         <p>Wij gebruiken gegevens niet voor marketingdoeleinden of geautomatiseerde besluitvorming/profilering.</p>
-        <br /><br />
-        <h2>5. Grondslagen</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>5. Grondslagen</h2>
         <ul>
-          <li>Uitvoering van een overeenkomst (het leveren van onze SaaS-dienst);</li>
-          <li>Wettelijke verplichting (fiscale bewaarplicht, boekhouding);</li>
+          <li>Uitvoering van een overeenkomst (het leveren van onze SaaS-dienst).</li>
+          <li>Wettelijke verplichting (fiscale bewaarplicht, boekhouding).</li>
           <li>Gerechtvaardigd belang (beveiliging en verbetering van onze diensten).</li>
         </ul>
-        <br /><br />
-        <h2>6. Bewaartermijnen</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>6. Bewaartermijnen</h2>
         <ul>
           <li>Factuur- en financiële gegevens: 7 jaar (wettelijke bewaarplicht).</li>
           <li>Gebruiks- en accountgegevens: maximaal 12 maanden na beëindiging van het contract.</li>
           <li>Supportberichten: maximaal 1 jaar.</li>
         </ul>
         <p>Daarna worden gegevens verwijderd of geanonimiseerd.</p>
-        <br /><br />
-        <h2>7. Delen van gegevens met derden</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>7. Delen van gegevens met derden</h2>
         <p>
           Wij delen persoonsgegevens alleen met partijen die ons ondersteunen bij de
           uitvoering van onze diensten. Deze partijen handelen als verwerkers in opdracht
@@ -99,9 +95,8 @@ export default function PrivacyPage() {
           <li>(Toekomstig) Betaal- en integratiepartners zoals banken, Mollie, Belastingdienst of Shopify.</li>
         </ul>
         <p>Met alle verwerkers wordt een verwerkersovereenkomst (DPA) afgesloten. Wij verkopen geen persoonsgegevens aan derden.</p>
-        <br /><br />
-        <h2>8. Beveiliging</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>8. Beveiliging</h2>
         <p>AdminiFlex treft passende technische en organisatorische maatregelen om gegevens te beschermen, waaronder:</p>
         <ul>
           <li>Versleutelde verbindingen (TLS/HTTPS, HSTS).</li>
@@ -110,17 +105,15 @@ export default function PrivacyPage() {
           <li>Logging en monitoring van toegang en wijzigingen.</li>
           <li>Regelmatige updates en afhankelijkheids-controles.</li>
         </ul>
-        <br /><br />
-        <h2>9. Cookies</h2>
+
+        <h2 style={{ color: oldGreen }}>9. Cookies</h2>
         <p>
-        <br /><br />
           Onze website gebruikt alleen functionele cookies die noodzakelijk zijn voor de
           werking van de site en het inloggen in de SaaS-omgeving. Er worden geen analytische
           of marketingcookies geplaatst zonder toestemming.
         </p>
-        <br /><br />
-        <h2>10. Rechten van betrokkenen</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>10. Rechten van betrokkenen</h2>
         <p>Betrokkenen hebben recht op:</p>
         <ul>
           <li>Inzage in hun persoonsgegevens.</li>
@@ -133,35 +126,31 @@ export default function PrivacyPage() {
           <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a>.
           Wij reageren binnen uiterlijk 30 dagen.
         </p>
-        <br /><br />
-        <h2>11. Internationale doorgifte</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>11. Internationale doorgifte</h2>
         <p>
           Onze gegevens worden primair opgeslagen binnen de EU. Indien gegevens buiten de
           EER worden verwerkt (bijv. door Amerikaanse cloudproviders), zorgen wij voor
           passende waarborgen conform artikel 46 AVG (EU-US Data Privacy Framework of
           standaardcontractbepalingen).
         </p>
-        <br /><br />
-        <h2>12. Beleid bij datalekken</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>12. Beleid bij datalekken</h2>
         <p>
           Bij een vermoeden van een beveiligingsincident of datalek meldt AdminiFlex dit
           onmiddellijk bij de Autoriteit Persoonsgegevens en — indien relevant — bij de
           betrokken klanten binnen 72 uur na ontdekking.
         </p>
-        <br /><br />
-        <h2>13. Wijzigingen</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>13. Wijzigingen</h2>
         <p>
           AdminiFlex behoudt zich het recht voor deze privacyverklaring aan te passen bij
           wijzigingen in wetgeving of bedrijfsvoering. De actuele versie is altijd
           beschikbaar op{" "}
           <a href="/privacy" style={{ color: oldGreen }}>www.adminiflex.nl/privacy</a>.
         </p>
-        <br /><br />
-        <h2>14. Contact</h2>
-        <br /><br />
+
+        <h2 style={{ color: oldGreen }}>14. Contact</h2>
         <p className="mb-0"><strong>AdminiFlex</strong></p>
         <p className="mb-0">E-mail: <a href="mailto:info@adminiflex.nl" style={{ color: oldGreen }}>info@adminiflex.nl</a></p>
         <p>Website: <a href="https://www.adminiflex.nl" style={{ color: oldGreen }}>www.adminiflex.nl</a></p>

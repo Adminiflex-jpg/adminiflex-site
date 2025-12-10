@@ -36,40 +36,69 @@ function AdminDropdownNav({ color }: { color: string }) {
     href: string;
     children?: { label: string; href: string }[];
   }[] = [
-    { key: "dashboard", label: "Dashboard", href: "/admin",
-      children: [{ label: "Aanpassen", href: "/admin/aanpassen" }] },
-    { key: "klanten", label: "Klanten", href: "/admin/klanten",
+    {
+      key: "dashboard",
+      label: "Dashboard",
+      href: "/admin",
+      children: [{ label: "Aanpassen", href: "/admin/aanpassen" }],
+    },
+    {
+      key: "klanten",
+      label: "Klanten",
+      href: "/admin/klanten",
       children: [
-        { label: "Aanmaken", href: "/admin/klanten/aanmaken" },
-        { label: "Overzicht", href: "/admin/klanten/overzicht" },
-        { label: "Downloads", href: "/admin/klanten/downloads" },
-      ]},
-    { key: "financieel", label: "Financieel", href: "/admin/financieel",
+        // 👉 hier staat nu jouw gewenste volgorde
+        { label: "Aanmaken",   href: "/admin/klanten/aanmaken" },
+        { label: "Contracten", href: "/admin/klanten/contracten" },
+        { label: "Overzicht",  href: "/admin/klanten/overzicht" },
+        { label: "Download",   href: "/admin/klanten/downloads" },
+      ],
+    },
+    {
+      key: "financieel",
+      label: "Financieel",
+      href: "/admin/financieel",
       children: [
         { label: "Debiteuren", href: "/admin/financieel/debiteuren" },
         { label: "Crediteuren", href: "/admin/financieel/crediteuren" },
         { label: "Bank", href: "/admin/financieel/bank" },
         { label: "Balans", href: "/admin/financieel/balans" },
-      ]},
-    { key: "producten", label: "Producten", href: "/admin/producten",
+      ],
+    },
+    {
+      key: "producten",
+      label: "Producten",
+      href: "/admin/producten",
       children: [
         { label: "Basic", href: "/admin/producten/basic" },
-        { label: "Plus",  href: "/admin/producten/plus"  },
-        { label: "Pro",   href: "/admin/producten/pro"   },
-      ]},
-    { key: "tickets", label: "Tickets", href: "/admin/tickets",
+        { label: "Plus", href: "/admin/producten/plus" },
+        { label: "Pro", href: "/admin/producten/pro" },
+      ],
+    },
+    {
+      key: "tickets",
+      label: "Tickets",
+      href: "/admin/tickets",
       children: [
         { label: "Openstaande", href: "/admin/tickets/openstaande" },
-        { label: "Archief",     href: "/admin/tickets/archief"     },
-        { label: "Per klant",   href: "/admin/tickets/per-klant"   },
-      ]},
+        { label: "Archief", href: "/admin/tickets/archief" },
+        { label: "Per klant", href: "/admin/tickets/per-klant" },
+      ],
+    },
     { key: "rapportages", label: "Rapportages", href: "/admin/rapportages" },
-    { key: "instellingen", label: "Instellingen", href: "/admin/instellingen",
+    {
+      key: "instellingen",
+      label: "Instellingen",
+      href: "/admin/instellingen",
       children: [
-        { label: "Gebruikers",       href: "/admin/instellingen/gebruikers" },
-        { label: "Rollen",           href: "/admin/instellingen/rollen" },
-        { label: "Bankinstellingen", href: "/admin/instellingen/bankinstellingen" },
-      ]},
+        { label: "Gebruikers", href: "/admin/instellingen/gebruikers" },
+        { label: "Rollen", href: "/admin/instellingen/rollen" },
+        {
+          label: "Bankinstellingen",
+          href: "/admin/instellingen/bankinstellingen",
+        },
+      ],
+    },
   ];
 
   const seg = pathname.replace(/^\/admin\/?/, "").split("/")[0] || "dashboard";
@@ -79,7 +108,7 @@ function AdminDropdownNav({ color }: { color: string }) {
 
   return (
     <>
-      {/* DESKTOP: pure CSS hover, no JS; no gap thanks to -mt-px */}
+      {/* DESKTOP: dropdowns */}
       <nav className="hidden md:flex items-center gap-6 text-sm">
         {items.map((it) => {
           const active =
@@ -91,7 +120,9 @@ function AdminDropdownNav({ color }: { color: string }) {
               {/* Trigger */}
               <Link
                 href={it.href}
-                className={`inline-block py-2 transition ${active ? "font-semibold" : ""}`}
+                className={`inline-block py-2 transition ${
+                  active ? "font-semibold" : ""
+                }`}
                 style={{ color }}
               >
                 {it.label}
@@ -101,7 +132,7 @@ function AdminDropdownNav({ color }: { color: string }) {
               {hasChildren && (
                 <div
                   className="
-                    absolute left-0 top-full -mt-px   /* -mt-px voorkomt hover-gap */
+                    absolute left-0 top-full -mt-px
                     w-56 rounded-lg border bg-white shadow-lg z-50
                     opacity-0 invisible translate-y-1
                     group-hover:opacity-100 group-hover:visible group-hover:translate-y-0
@@ -172,7 +203,11 @@ function AdminDropdownNav({ color }: { color: string }) {
                       <ul className="px-3 pb-3">
                         {it.children.map((c) => (
                           <li key={c.href} className="py-1">
-                            <Link href={c.href} className="underline" style={{ color }}>
+                            <Link
+                              href={c.href}
+                              className="underline"
+                              style={{ color }}
+                            >
                               {c.label}
                             </Link>
                           </li>

@@ -45,7 +45,8 @@ export default function ContactPage() {
     <main className="max-w-3xl mx-auto px-4 md:px-6 py-16">
       <h1 className="text-3xl font-semibold">Contact</h1>
       <p className="mt-2 text-zinc-700">
-        Stel je vraag of plan een demo. We reageren doorgaans binnen één werkdag.
+      Heeft u een vraag of wilt u een demo van AdminiFlex plannen?
+      Laat uw gegevens achter; wij nemen doorgaans binnen één werkdag contact met u op.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 grid gap-4">
