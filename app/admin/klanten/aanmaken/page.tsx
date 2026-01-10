@@ -3,7 +3,7 @@ import { Prisma, PrismaClient, PlanCode } from "@prisma/client";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { redirect } from "next/navigation";
-import { BRAND_GREEN, BRAND_MINT } from "../../../../lib/theme";
+import { BRAND_GREEN } from "../../../../lib/theme";
 
 const prisma = new PrismaClient();
 
@@ -40,7 +40,7 @@ export default async function NieuweKlantomgevingPage({
     redirect("/login");
   }
 
-  // 2. Application ophalen als ?app=<id> is meegegeven
+  // 2. Application ophalen als ?app=<id> is meegegeven (prefill)
   const appId = searchParams?.app;
   type AppSelection = Prisma.ApplicationGetPayload<{
     select: {
@@ -56,6 +56,7 @@ export default async function NieuweKlantomgevingPage({
       plan: true;
     };
   }>;
+
   let appData: AppSelection | null = null;
 
   if (appId) {
@@ -87,226 +88,220 @@ export default async function NieuweKlantomgevingPage({
   ];
 
   return (
-    <main
-      className="min-h-screen"
-      style={{
-        background: `linear-gradient(180deg, ${BRAND_MINT} 0%, #ffffff 100%)`,
-      }}
-    >
-      <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-semibold">
-            Nieuwe klantomgeving aanmaken
-          </h1>
-          <a
-            href="/admin/klanten/overzicht"
-            className="px-3 py-2 rounded-md border text-sm"
-            style={{ borderColor: BRAND_GREEN, color: BRAND_GREEN }}
-          >
-            ← Terug naar klantenoverzicht
-          </a>
-        </div>
-
-        <p className="text-sm text-zinc-600 mb-8 max-w-3xl">
-          Vul de gegevens van de klant in. We maken automatisch een
-          conceptcontract aan op basis van het gekozen pakket en (optioneel) een
-          demo-omgeving.
-        </p>
-
-        <form
-          action="/api/admin/customers/create"
-          method="POST"
-          className="space-y-8"
+    <main className="max-w-3xl mx-auto px-4 md:px-6 py-16">
+      {/* Titel + teruglink, zelfde structuur als contact */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h1 className="text-3xl font-semibold">
+          Nieuwe klantomgeving aanmaken
+        </h1>
+        <a
+          href="/admin/klanten/overzicht"
+          className="px-3 py-2 rounded-md border text-sm"
+          style={{ borderColor: BRAND_GREEN, color: BRAND_GREEN }}
         >
-          {/* Als deze klant vanuit een Application komt, stuur de id mee */}
-          {appData && (
-            <input type="hidden" name="applicationId" value={appData.id} />
-          )}
+          ← Terug naar overzicht
+        </a>
+      </div>
 
-          {/* Bedrijfsgegevens + adres */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border rounded-lg p-5 shadow-sm">
-              <h2 className="font-semibold mb-4">Bedrijfsgegevens</h2>
+      <p className="mt-2 text-zinc-700">
+        Vul de gegevens van de klant in. We maken automatisch een
+        conceptcontract aan op basis van het gekozen pakket en, indien gewenst,
+        een demo-omgeving van 30 dagen.
+      </p>
 
-              <label className="block text-sm mb-3">
-                <span className="block mb-1">Bedrijfsnaam*</span>
-                <input
-                  name="companyName"
-                  required
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  defaultValue={appData?.companyName ?? ""}
-                />
-              </label>
+      {/* Formulier – zelfde “blok”-stijl als contact: één kolom, duidelijke labels */}
+      <form
+        action="/api/admin/customers/create"
+        method="POST"
+        className="mt-8 grid gap-6"
+      >
+        {/* Als deze klant vanuit een Application komt, stuur de id mee */}
+        {appData && (
+          <input type="hidden" name="applicationId" value={appData.id} />
+        )}
 
-              <label className="block text-sm mb-3">
-                <span className="block mb-1">Contactpersoon*</span>
-                <input
-                  name="contactName"
-                  required
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  defaultValue={appData?.contactName ?? ""}
-                />
-              </label>
+        {/* Bedrijfsgegevens */}
+        <section className="grid gap-4">
+          <h2 className="text-lg font-semibold">Bedrijfsgegevens</h2>
 
+          <div>
+            <label className="block text-sm mb-1">Bedrijfsnaam*</label>
+            <input
+              name="companyName"
+              required
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              defaultValue={appData?.companyName ?? ""}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Contactpersoon*</label>
+            <input
+              name="contactName"
+              required
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              defaultValue={appData?.contactName ?? ""}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">E-mailadres*</label>
+            <input
+              type="email"
+              name="email"
+              required
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              defaultValue={appData?.email ?? ""}
+            />
+          </div>
+        </section>
+
+        {/* Adres & registratie */}
+        <section className="grid gap-4">
+          <h2 className="text-lg font-semibold">Adres &amp; registratie</h2>
+
+          <div>
+            <label className="block text-sm mb-1">Adres</label>
+            <input
+              name="address"
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              defaultValue={appData?.address ?? ""}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm mb-1">Postcode</label>
+              <input
+                name="postalCode"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                defaultValue={appData?.postalCode ?? ""}
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Plaats</label>
+              <input
+                name="city"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                defaultValue={appData?.city ?? ""}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm mb-1">KvK-nummer</label>
+              <input
+                name="kvk"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                defaultValue={appData?.kvk ?? ""}
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">BTW-nummer</label>
+              <input
+                name="btw"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                defaultValue={appData?.btw ?? ""}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Abonnement / pakket + demo */}
+        <section className="grid gap-4">
+          <h2 className="text-lg font-semibold">Abonnement</h2>
+
+          <div>
+            <label className="block text-sm mb-1">Pakket*</label>
+            <select
+              name="plan"
+              required
+              className="w-full border rounded-md px-3 py-2 text-sm"
+              defaultValue={appData?.plan ?? "BASIC"}
+            >
+              {allPlans.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <p className="text-xs text-zinc-600">
+            Het gekozen pakket wordt ook automatisch in het contract opgenomen.
+          </p>
+
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="isDemo"
+              value="on"
+              className="mt-1"
+            />
+            <span>
+              Maak demo-omgeving (30 dagen actief)
+              <br />
+              <span className="text-xs text-zinc-600">
+                De klantomgeving wordt gemarkeerd als demo en krijgt automatisch
+                een einddatum 30 dagen vanaf vandaag.
+              </span>
+            </span>
+          </label>
+        </section>
+
+        {/* Login voor klantomgeving */}
+        <section className="grid gap-4">
+          <h2 className="text-lg font-semibold">Login voor klantomgeving</h2>
+          <p className="text-xs text-zinc-600">
+            Dit zijn de inloggegevens die de klant gebruikt op{" "}
+            <code className="px-1 py-0.5 bg-zinc-100 rounded text-[11px]">
+              /portal/login
+            </code>
+            . Geef deze veilig door.
+          </p>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
               <label className="block text-sm mb-1">
-                <span className="block mb-1">E-mailadres*</span>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  defaultValue={appData?.email ?? ""}
-                />
+                E-mailadres klantlogin*
               </label>
-            </div>
-
-            <div className="bg-white border rounded-lg p-5 shadow-sm">
-              <h2 className="font-semibold mb-4">Adres &amp; registratie</h2>
-
-              <label className="block text-sm mb-3">
-                <span className="block mb-1">Adres</span>
-                <input
-                  name="address"
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  defaultValue={appData?.address ?? ""}
-                />
-              </label>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <label className="block text-sm">
-                  <span className="block mb-1">Postcode</span>
-                  <input
-                    name="postalCode"
-                    className="w-full border rounded-md px-3 py-2 text-sm"
-                    defaultValue={appData?.postalCode ?? ""}
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="block mb-1">Plaats</span>
-                  <input
-                    name="city"
-                    className="w-full border rounded-md px-3 py-2 text-sm"
-                    defaultValue={appData?.city ?? ""}
-                  />
-                </label>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="block text-sm">
-                  <span className="block mb-1">KvK-nummer</span>
-                  <input
-                    name="kvk"
-                    className="w-full border rounded-md px-3 py-2 text-sm"
-                    defaultValue={appData?.kvk ?? ""}
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="block mb-1">BTW-nummer</span>
-                  <input
-                    name="btw"
-                    className="w-full border rounded-md px-3 py-2 text-sm"
-                    defaultValue={appData?.btw ?? ""}
-                  />
-                </label>
-              </div>
-            </div>
-          </section>
-
-          {/* Abonnement + demo-vlag */}
-          <section className="bg-white border rounded-lg p-5 shadow-sm max-w-xl">
-            <h2 className="font-semibold mb-4">Abonnement</h2>
-
-            <label className="block text-sm mb-2">
-              <span className="block mb-1">Pakket*</span>
-              <select
-                name="plan"
+              <input
+                type="email"
+                name="portalEmail"
                 required
                 className="w-full border rounded-md px-3 py-2 text-sm"
-                defaultValue={appData?.plan ?? "BASIC"}
-              >
-                {allPlans.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <p className="text-xs text-zinc-600 mb-3">
-              Dit pakket wordt ook automatisch in het contract opgenomen.
-            </p>
-
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="isDemo"
-                value="on"
-                className="mt-1"
+                defaultValue={appData?.email ?? ""}
               />
-              <span>
-                Maak demo-omgeving (30 dagen actief)
-                <br />
-                <span className="text-xs text-zinc-600">
-                  Als je dit aanvinkt, wordt deze klantomgeving gemarkeerd als
-                  demo en automatisch voorzien van een einddatum 30 dagen vanaf
-                  vandaag.
-                </span>
-              </span>
-            </label>
-          </section>
-
-          {/* Login voor klantomgeving */}
-          <section className="bg-white border rounded-lg p-5 shadow-sm">
-            <h2 className="font-semibold mb-4">Login voor klantomgeving</h2>
-            <p className="text-xs text-zinc-600 mb-4">
-              Dit zijn de inloggegevens die de klant gebruikt op{" "}
-              <code className="px-1 py-0.5 bg-zinc-100 rounded text-[11px]">
-                /portal/login
-              </code>
-              . Geef deze veilig door.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="block text-sm">
-                <span className="block mb-1">E-mailadres klantlogin*</span>
-                <input
-                  type="email"
-                  name="portalEmail"
-                  required
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  defaultValue={appData?.email ?? ""}
-                />
-              </label>
-
-              <label className="block text-sm">
-                <span className="block mb-1">Tijdelijk wachtwoord*</span>
-                <input
-                  type="text"
-                  name="portalPassword"
-                  required
-                  className="w-full border rounded-md px-3 py-2 text-sm"
-                  placeholder="Bijv. tijdelijk-wachtwoord"
-                />
-              </label>
             </div>
-          </section>
 
-          {/* Opslaan-knop */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-md text-white text-sm font-medium"
-              style={{ backgroundColor: BRAND_GREEN }}
-            >
-              Klantomgeving aanmaken
-            </button>
+            <div>
+              <label className="block text-sm mb-1">Tijdelijk wachtwoord*</label>
+              <input
+                type="text"
+                name="portalPassword"
+                required
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                placeholder="Bijv. Tijdelijk2025!"
+              />
+            </div>
           </div>
-        </form>
-      </div>
+        </section>
+
+        {/* Opslaan-knop */}
+        <div className="pt-2 flex justify-end">
+          <button
+            type="submit"
+            className="px-5 py-3 rounded-md text-white text-sm font-medium"
+            style={{ backgroundColor: BRAND_GREEN }}
+          >
+            Klantomgeving aanmaken
+          </button>
+        </div>
+      </form>
     </main>
   );
 }
-
 
 /**
  * Hier staat je volledige contract-template.
@@ -424,3 +419,4 @@ Functie: [functie invullen]<br/>
 Datum: ${today}</p>
 `.trim();
 }
+

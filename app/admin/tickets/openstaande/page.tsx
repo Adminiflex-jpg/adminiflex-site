@@ -81,6 +81,10 @@ export default async function OpenstaandeTicketsPage() {
                 <th className="px-4 py-2 text-left font-medium border-b">
                   Pakket
                 </th>
+                {/* NIEUWE KOLUM VOOR OPMERKINGEN */}
+                <th className="px-4 py-2 text-left font-medium border-b">
+                  Opmerkingen
+                </th>
                 <th className="px-4 py-2 text-left font-medium border-b">
                   Acties
                 </th>
@@ -96,8 +100,12 @@ export default async function OpenstaandeTicketsPage() {
                   <td className="px-4 py-2">{app.contactName}</td>
                   <td className="px-4 py-2">{app.email}</td>
                   <td className="px-4 py-2">{app.plan}</td>
+                  {/* OPMERKINGEN TONEN UIT Application.notes */}
+                  <td className="px-4 py-2 max-w-xs whitespace-pre-wrap">
+                    {/* pas 'notes' aan als jouw veld in Prisma anders heet */}
+                    {app.notes && app.notes.trim() !== "" ? app.notes : "—"}
+                  </td>
                   <td className="px-4 py-2">
-                    {/* 👉 BELANGRIJK: app-id doorgeven in de URL */}
                     <Link
                       href={`/admin/klanten/aanmaken?app=${app.id}`}
                       className="inline-flex items-center px-3 py-1 rounded-md text-white text-xs md:text-sm"

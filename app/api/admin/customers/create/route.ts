@@ -7,6 +7,7 @@ import {
   ContractStatus,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer"; // ✅ nieuw
 
 const prisma = new PrismaClient();
 
@@ -215,6 +216,79 @@ function buildContractHtml(opts: {
 }
 
 /**
+ * E-mail sturen naar demo-klant met inloggegevens
+ */
+async function sendDemoEmail(params: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  loginEmail: string;
+  tempPassword: string;
+  demoExpiresAt: Date;
+}) {
+  const {
+    to,
+    contactName,
+    companyName,
+    loginEmail,
+    tempPassword,
+    demoExpiresAt,
+  } = params;
+
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || "587");
+  const secure = process.env.SMTP_SECURE === "true";
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  // Als SMTP niet goed is ingesteld: loggen, maar niet crashen
+  if (!host || !user || !pass) {
+    console.warn(
+      "[sendDemoEmail] SMTP-gegevens ontbreken (SMTP_HOST/SMTP_USER/SMTP_PASS). E-mail wordt niet verzonden."
+    );
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+  });
+
+  const from = process.env.SMTP_FROM || "noreply@adminiflex.nl";
+  const portalUrl =
+    process.env.PORTAL_LOGIN_URL || "https://www.adminiflex.nl/portal/login";
+
+  const vervalDatum = demoExpiresAt.toLocaleDateString("nl-NL");
+
+  const html = `
+    <p>Beste ${contactName},</p>
+    <p>
+      Je demo-omgeving voor <strong>${companyName}</strong> is aangemaakt in AdminiFlex.
+    </p>
+    <p>Je kunt inloggen via: <a href="${portalUrl}">${portalUrl}</a></p>
+    <p>
+      <strong>Gebruikersnaam:</strong> ${loginEmail}<br/>
+      <strong>Tijdelijk wachtwoord:</strong> ${tempPassword}
+    </p>
+    <p>
+      De demo-omgeving is geldig tot en met <strong>${vervalDatum}</strong>.
+      Na deze datum wordt de toegang automatisch geblokkeerd, tenzij jullie
+      kiezen voor omzetting naar een betaald abonnement.
+    </p>
+    <p>Met vriendelijke groet,<br/>Het AdminiFlex-team</p>
+  `;
+
+  await transporter.sendMail({
+    from,
+    to,
+    subject: "Jouw AdminiFlex demo-omgeving is klaar",
+    html,
+  });
+}
+
+/**
  * POST /api/admin/customers/create
  * Maakt:
  *  - Customer (met isActive = false + evt. demoActive/demoExpiresAt)
@@ -243,7 +317,7 @@ export async function POST(req: Request) {
     const portalEmail = String(form.get("portalEmail") ?? "").trim().toLowerCase();
     const portalPassword = String(form.get("portalPassword") ?? "");
 
-    // ✅ Nieuw: demo-veld uitlezen uit formulier (checkbox, hidden of radio)
+    // ✅ Demo-veld uitlezen uit formulier (checkbox, hidden of radio)
     const isDemoRaw = String(form.get("isDemo") ?? "").toLowerCase();
     const isDemo =
       isDemoRaw === "1" ||
@@ -322,7 +396,24 @@ export async function POST(req: Request) {
       },
     });
 
-    // 4) Terug naar contract-overzicht
+    // 4) Als demo → e-mail sturen met inloggegevens
+    if (isDemo && demoExpiresAt) {
+      try {
+        await sendDemoEmail({
+          to: email, // contact e-mailadres klant
+          contactName,
+          companyName,
+          loginEmail: portalEmail,
+          tempPassword: portalPassword,
+          demoExpiresAt,
+        });
+      } catch (err) {
+        console.error("[customers/create] Demo-mail kon niet worden verstuurd:", err);
+        // we laten de redirect gewoon doorgaan
+      }
+    }
+
+    // 5) Terug naar contract-overzicht
     return NextResponse.redirect(
       new URL(
         "/admin/klanten/contracten?success=Klantomgeving+en+contract+aangemaakt",

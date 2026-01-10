@@ -83,6 +83,7 @@ function AdminDropdownNav({ color }: { color: string }) {
         { label: "Openstaande", href: "/admin/tickets/openstaande" },
         { label: "Archief", href: "/admin/tickets/archief" },
         { label: "Per klant", href: "/admin/tickets/per-klant" },
+        { label: "Contactberichten", href: "/admin/tickets/contactberichten" },
       ],
     },
     { key: "rapportages", label: "Rapportages", href: "/admin/rapportages" },
