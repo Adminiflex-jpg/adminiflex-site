@@ -2,17 +2,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { BRAND_GREEN, BRAND_GREEN_DEEP, BRAND_MINT } from "../../lib/theme";
+import { BRAND_GREEN } from "../../lib/theme";
+import PublicFormLayout from "../components/PublicFormLayout";
 
 export default function ContactPage() {
+  const oldGreen = BRAND_GREEN;
+
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<null | { ok: boolean; msg: string }>(
     null
   );
-
-  const oldGreen = BRAND_GREEN;
-  const deepGreen = BRAND_GREEN_DEEP;
-  const lightMint = BRAND_MINT;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,12 +22,9 @@ export default function ContactPage() {
 
     const data = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
-      email: (form.elements.namedItem("email") as HTMLInputElement).value
-        .trim(),
-      subject: (form.elements.namedItem("subject") as HTMLInputElement).value
-        .trim(),
-      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value
-        .trim(),
+      email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
+      subject: (form.elements.namedItem("subject") as HTMLInputElement).value.trim(),
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       // honeypot (bot-detectie)
       company: (form.elements.namedItem("company") as HTMLInputElement).value,
     };
@@ -47,10 +43,7 @@ export default function ContactPage() {
         });
         form.reset();
       } else {
-        setStatus({
-          ok: false,
-          msg: "Verzenden mislukt. Probeer het opnieuw.",
-        });
+        setStatus({ ok: false, msg: "Verzenden mislukt. Probeer het opnieuw." });
       }
     } catch {
       setStatus({
@@ -63,96 +56,79 @@ export default function ContactPage() {
   }
 
   return (
-    <main
-      className="min-h-screen bg-zinc-50"
-      style={{
-        color: oldGreen,
-        background: `linear-gradient(180deg, ${lightMint}, white)`,
-      }}
+    <PublicFormLayout
+      title="Contact"
+      description="Heeft u een vraag of wilt u een demo plannen? Laat uw gegevens achter; wij nemen contact met u op."
     >
-      <section className="max-w-4xl mx-auto px-4 md:px-6 py-12 md:py-16">
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-          Contact
-        </h1>
-        <p className="mt-2 text-zinc-700 max-w-2xl">
-          Heeft u een vraag of wilt u een demo van AdminiFlex plannen? Laat uw
-          gegevens achter; wij nemen doorgaans binnen één werkdag contact met u
-          op.
-        </p>
+      <form
+        onSubmit={onSubmit}
+        className="mt-8 bg-white border rounded-2xl p-6 shadow-sm grid gap-4"
+      >
+        {/* Honeypot (verborgen veld voor bots) */}
+        <input
+          type="text"
+          name="company"
+          className="hidden"
+          tabIndex={-1}
+          autoComplete="off"
+        />
 
-        <form
-          onSubmit={onSubmit}
-          className="mt-8 bg-white border rounded-2xl p-6 shadow-sm grid gap-4"
-        >
-          {/* Honeypot (verborgen veld voor bots) */}
-          <input
-            type="text"
-            name="company"
-            className="hidden"
-            tabIndex={-1}
-            autoComplete="off"
-          />
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-1">
-              <label className="block text-sm font-medium">Naam</label>
-              <input
-                name="name"
-                required
-                className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="md:col-span-1">
-              <label className="block text-sm font-medium">E-mail</label>
-              <input
-                name="email"
-                type="email"
-                required
-                className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
-
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium">Onderwerp</label>
+            <label className="block text-sm font-medium">Naam *</label>
             <input
-              name="subject"
+              name="name"
+              required
               className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Bericht</label>
-            <textarea
-              name="message"
+            <label className="block text-sm font-medium">E-mailadres *</label>
+            <input
+              name="email"
+              type="email"
               required
-              rows={6}
               className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
             />
           </div>
+        </div>
 
-          <div className="pt-2 flex flex-col gap-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-3 rounded-md text-white font-medium disabled:opacity-60"
-              style={{ backgroundColor: oldGreen }}
-            >
-              {loading ? "Verzenden…" : "Verstuur bericht"}
-            </button>
+        <div>
+          <label className="block text-sm font-medium">Onderwerp</label>
+          <input
+            name="subject"
+            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+          />
+        </div>
 
-            {status && (
-              <div
-                className={`text-sm ${
-                  status.ok ? "text-emerald-700" : "text-red-600"
-                }`}
-              >
-                {status.msg}
-              </div>
-            )}
-          </div>
-        </form>
-      </section>
-    </main>
+        <div>
+          <label className="block text-sm font-medium">Bericht *</label>
+          <textarea
+            name="message"
+            required
+            rows={6}
+            className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="pt-2 grid gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-5 py-3 rounded-md text-white font-medium disabled:opacity-60"
+            style={{ backgroundColor: oldGreen }}
+          >
+            {loading ? "Verzenden…" : "Verstuur bericht"}
+          </button>
+
+          {status ? (
+            <div className={`text-sm ${status.ok ? "text-emerald-700" : "text-red-600"}`}>
+              {status.msg}
+            </div>
+          ) : null}
+        </div>
+      </form>
+    </PublicFormLayout>
   );
 }

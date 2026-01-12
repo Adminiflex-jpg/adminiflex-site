@@ -4,11 +4,9 @@ import React from "react";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import HeaderSwitcher from "./components/HeaderSwitcher";
-import {
-  BRAND_GREEN,
-  BRAND_GREEN_DEEP,
-  BRAND_MINT,
-} from "../lib/theme";
+import CookieConsent from "./components/CookieConsent"; // ✅ toegevoegd
+import { BRAND_GREEN, BRAND_GREEN_DEEP, BRAND_MINT } from "../lib/theme";
+import Link from "next/link";
 
 export const metadata = {
   title: "AdminiFlex",
@@ -49,23 +47,17 @@ export default async function RootLayout({
         <header className="sticky top-0 z-40 bg-white border-b md:bg-white/80 md:backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
             {/* Logo */}
-<a
-  href={loggedIn ? "/admin" : "/"}
-  className="flex items-center gap-3"
->
-  <div
-    className="w-9 h-9 rounded-xl grid place-items-center text-white font-semibold"
-    style={{
-      background: "linear-gradient(135deg, #2F6B4F, #1E4C37)", // of je theme-constants
-    }}
-  >
-    <span className="text-[11px] leading-none select-none">AF</span>
-  </div>
-  <span className="font-semibold tracking-tight text-lg">
-    AdminiFlex
-  </span>
-</a>
-
+            <a href={loggedIn ? "/admin" : "/"} className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-xl grid place-items-center text-white font-semibold"
+                style={{
+                  background: "linear-gradient(135deg, #2F6B4F, #1E4C37)",
+                }}
+              >
+                <span className="text-[11px] leading-none select-none">AF</span>
+              </div>
+              <span className="font-semibold tracking-tight text-lg">AdminiFlex</span>
+            </a>
 
             {/* Menu-schakelaar (admin / publiek) */}
             <HeaderSwitcher loggedIn={loggedIn} oldGreen={BRAND_GREEN} />
@@ -140,14 +132,17 @@ export default async function RootLayout({
               <a href="/privacy">Privacy</a>
               <a href="/voorwaarden">Voorwaarden</a>
               <a href="/status">Status</a>
+              <Link href="/cookies">Cookies</Link>
               <a href="/contact">Contact</a>
             </div>
             <div>
-              © {new Date().getFullYear()} AdminiFlex. Alle rechten
-              voorbehouden.
+              © {new Date().getFullYear()} AdminiFlex. Alle rechten voorbehouden.
             </div>
           </div>
         </footer>
+
+        {/* ✅ Cookie pop-up (staat expres helemaal onderaan de body) */}
+        <CookieConsent />
       </body>
     </html>
   );
