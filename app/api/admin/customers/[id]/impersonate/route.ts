@@ -8,8 +8,11 @@ export const runtime = "nodejs";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  // ✅ In Next 16 is context.params een Promise, dus eerst awaiten
+  const { id } = await context.params;
+
   // 1. Controleer admin-sessie via de bestaande JWT-cookie "session"
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value || "";
@@ -35,9 +38,7 @@ export async function GET(
     );
   }
 
-  // 2. Haal de klant op op basis van het id uit de URL
-  const { id } = context.params;
-
+  // 2. Haal de klant op
   const customer = await prisma.customer.findUnique({
     where: { id },
   });
@@ -52,7 +53,7 @@ export async function GET(
   }
 
   // 3. Redirect naar de klantomgeving (klantdashboard)
-  const tenantSlug = customer.number; // bij jou is het klantnummer de slug
+  const tenantSlug = customer.number; // klantnummer als slug
   const target = new URL(`/portal/${tenantSlug}/dashboard`, req.url);
 
   return NextResponse.redirect(target);
